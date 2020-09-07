@@ -3,13 +3,13 @@
   "dependencies": [
     {
       "source": {
-        "local": {
-          "directory": "../.."
+        "git": {
+          "remote": "https://github.com/observatorium/deployments.git",
+          "subdir": ""
         }
       },
-      "version": "",
-"      name": "deployments"
+      "version": "master"
     }
   ],
-  "legacyImports": true
+  "legacyImports": false
 }

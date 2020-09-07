@@ -1,4 +1,4 @@
-local manifests = (import 'obs-operator.jsonnet').manifests;
+local manifests = (import './obs-operator.jsonnet').manifests;
 
 {
   objects: manifests,

@@ -1,8 +1,9 @@
-local t = (import 'kube-thanos/thanos.libsonnet');
-local config = import 'operator-config.libsonnet';
-local obs = ((import '../../components/observatorium.libsonnet') + {
+local t = (import 'github.com/thanos-io/kube-thanos/jsonnet/kube-thanos/thanos.libsonnet');
+local config = import './operator-config.libsonnet';
+local obs = ((import 'vendor/github.com/observatorium/deployments/components/observatorium.libsonnet') + {
                config+:: config,
-             } + (import '../../components/observatorium-configure.libsonnet'));
+             } + (import 'vendor/github.com/observatorium/deployments/components/observatorium-configure.libsonnet'));
+
 
 local patchObs = obs {
   compact+::
