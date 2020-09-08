@@ -70,10 +70,10 @@ deploy_operator() {
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-pvc.yaml
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-deployment.yaml
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-service.yaml
-    $KUBECTL apply -n observatorium -f tests/manifests/observatorium-xyz-tls-configmap.yaml
-    $KUBECTL apply -n observatorium -f tests/manifests/observatorium-xyz-tls-secret.yaml
-    $KUBECTL apply -f operator/manifests/crds
-    $KUBECTL apply -f operator/manifests/
+    $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
+    $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-secret.yaml
+    $KUBECTL apply -f manifests/crds
+    $KUBECTL apply -f manifests/
     $KUBECTL apply -n observatorium -f example/manifests
     wait_for_cr observatorium-xyz
 }
