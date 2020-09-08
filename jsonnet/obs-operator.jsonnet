@@ -31,6 +31,10 @@ local patchObs = obs {
       }
     for i in std.range(0, obs.config.store.shards - 1)
   },
+
+  loki+:: loki.withVolumeClaimTemplate {
+    config+:: obs.loki.config,
+  },
 };
 
 {
