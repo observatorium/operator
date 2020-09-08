@@ -29,6 +29,7 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run: make vendor-jsonnet
       - run: |
           echo "$DOCKER_PASS" | docker login quay.io --username $DOCKER_USER --password-stdin
           make container-push
