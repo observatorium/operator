@@ -16,10 +16,10 @@ kind() {
 
 dex() {
     $KUBECTL create ns dex || true
-    $KUBECTL apply -f environments/dev/manifests/dex-secret.yaml
-    $KUBECTL apply -f environments/dev/manifests/dex-pvc.yaml
-    $KUBECTL apply -f environments/dev/manifests/dex-deployment.yaml
-    $KUBECTL apply -f environments/dev/manifests/dex-service.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-secret.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-pvc.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-deployment.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-service.yaml
     # Observatorium needs the Dex API to be ready for authentication to work and thus for the tests to pass.
     $KUBECTL wait --for=condition=available --timeout=10m -n dex deploy/dex || (must_gather "$ARTIFACT_DIR" && exit 1)
 }
@@ -30,7 +30,7 @@ deploy() {
     $KUBECTL create ns observatorium-minio || true
     $KUBECTL create ns observatorium || true
     dex
-    $KUBECTL apply -f environments/dev/manifests/
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests
 }
 
 wait_for_cr() {
@@ -65,11 +65,11 @@ deploy_operator() {
     $KUBECTL create ns observatorium-minio || true
     $KUBECTL create ns observatorium || true
     dex
-    $KUBECTL apply -f environments/dev/manifests/minio-secret-thanos.yaml
-    $KUBECTL apply -f environments/dev/manifests/minio-secret-loki.yaml
-    $KUBECTL apply -f environments/dev/manifests/minio-pvc.yaml
-    $KUBECTL apply -f environments/dev/manifests/minio-deployment.yaml
-    $KUBECTL apply -f environments/dev/manifests/minio-service.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-secret-thanos.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-secret-loki.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-pvc.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-deployment.yaml
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/minio-service.yaml
     $KUBECTL apply -n observatorium -f tests/manifests/observatorium-xyz-tls-configmap.yaml
     $KUBECTL apply -n observatorium -f tests/manifests/observatorium-xyz-tls-secret.yaml
     $KUBECTL apply -f operator/manifests/crds
