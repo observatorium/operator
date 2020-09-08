@@ -1,2 +1,4 @@
 /jsonnet/vendor/
+/kind
+/kubectl
 /tmp/

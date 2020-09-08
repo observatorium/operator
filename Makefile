@@ -53,6 +53,7 @@ $(CONTROLLER_GEN): $(BIN_DIR)
 	GO111MODULE="on" go build -o $@ sigs.k8s.io/controller-tools/cmd/controller-gen
 
 $(JB): $(BIN_DIR)
+	go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb
 	GO111MODULE="on" go build -o $@ github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb
 
 JSONNET_SRC = $(shell find . -type f -not -path './*vendor/*' \( -name '*.libsonnet' -o -name '*.jsonnet' \))
