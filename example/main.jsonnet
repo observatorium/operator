@@ -1,4 +1,4 @@
-local dex = (import '../components/dex.libsonnet') + {
+local dex = (import 'github.com/observatorium/deployments/components/dex.libsonnet') + {
   config+:: {
     local cfg = self,
     name: 'dex',

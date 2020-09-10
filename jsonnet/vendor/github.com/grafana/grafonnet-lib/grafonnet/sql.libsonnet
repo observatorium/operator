@@ -1,12 +1,6 @@
 {
   /**
-   * Creates an SQL target.
-   *
    * @name sql.target
-   *
-   * @param rawSql The SQL query
-   * @param datasource (optional)
-   * @param format (default `'time_series'`)
    */
   target(
     rawSql,
