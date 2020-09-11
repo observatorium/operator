@@ -13,8 +13,13 @@ CONTROLLER_GEN ?= $(BIN_DIR)/controller-gen
 JB ?= $(BIN_DIR)/jb
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: $(CONTROLLER_GEN)
+manifests: example/manifests/observatorium.yaml manifests/crds/core.observatorium.io_observatoria.yaml
+
+manifests/crds/core.observatorium.io_observatoria.yaml: $(CONTROLLER_GEN) $(find api/v1alpha1 -type f -name '*.go')
 	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=manifests/crds
+
+example/manifests/observatorium.yaml: example/main.jsonnet
+	jsonnet -J jsonnet/vendor example/main.jsonnet | gojsontoyaml > example/manifests/observatorium.yaml
 
 # Run go fmt against code
 fmt:
@@ -25,7 +30,9 @@ vet:
 	go vet ./...
 
 # Generate code
-generate: $(CONTROLLER_GEN)
+generate: api/v1alpha1/zz_generated.deepcopy.go
+
+api/v1alpha1/zz_generated.deepcopy.go: $(CONTROLLER_GEN)
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image

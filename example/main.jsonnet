@@ -33,7 +33,7 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
   },
 };
 
-local obs = (import '../environments/base/observatorium.jsonnet');
+local obs = (import 'github.com/observatorium/deployments/environments/base/observatorium.jsonnet');
 
 {
   local cr = self,
