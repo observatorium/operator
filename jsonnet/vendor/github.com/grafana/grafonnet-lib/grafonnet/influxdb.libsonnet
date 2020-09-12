@@ -1,24 +1,23 @@
 {
   /**
-   * Creates an [InfluxDB target](https://grafana.com/docs/grafana/latest/features/datasources/influxdb/)
+   * Return an InfluxDB Target
    *
    * @name influxdb.target
    *
    * @param query Raw InfluxQL statement
    *
-   * @param alias (optional) 'Alias By' pattern
-   * @param datasource (optional) Datasource
-   * @param hide (optional) Disable query on graph
+   * @param alias 'Alias By' pattern
+   * @param datasource Datasource
    *
-   * @param rawQuery (optional) Enable/disable raw query mode
+   * @param rawQuery Enable/disable raw query mode
    *
-   * @param policy (default: `'default'`) Tagged query 'From' policy
-   * @param measurement (optional) Tagged query 'From' measurement
-   * @param group_time (default: `'$__interval'`) 'Group by' time condition (if set to null, do not groups by time)
-   * @param group_tags (optional) 'Group by' tags list
-   * @param fill (default: `'none'`) 'Group by' missing values fill mode (works only with 'Group by time()')
+   * @param policy Tagged query 'From' policy
+   * @param measurement Tagged query 'From' measurement
+   * @param group_time 'Group by' time condition (if set to null, do not groups by time)
+   * @param group_tags 'Group by' tags list
+   * @param fill 'Group by' missing values fill mode (works only with 'Group by time()')
    *
-   * @param resultFormat (default: `'time_series'`) Format results as 'Time series' or 'Table'
+   * @param resultFormat Format results as 'Time series' or 'Table'
    *
    * @return Panel target
    */
@@ -27,7 +26,6 @@
 
     alias=null,
     datasource=null,
-    hide=null,
 
     rawQuery=null,
 
@@ -44,7 +42,6 @@
 
     [if alias != null then 'alias']: alias,
     [if datasource != null then 'datasource']: datasource,
-    [if hide != null then 'hide']: hide,
 
     [if query != null then 'query']: query,
     [if rawQuery != null then 'rawQuery']: rawQuery,

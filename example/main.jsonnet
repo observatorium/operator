@@ -166,6 +166,7 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
       image: obs.config.loki.image,
       replicas: obs.config.loki.replicas,
       version: obs.config.loki.version,
+      volumeClaimTemplate: obs.config.loki.volumeClaimTemplate,
     },
   },
 }

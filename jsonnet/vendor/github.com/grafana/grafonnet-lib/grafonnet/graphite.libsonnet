@@ -1,14 +1,14 @@
 {
   /**
-   * Creates a [Graphite target](https://grafana.com/docs/grafana/latest/features/datasources/graphite/)
+   * Return an Graphite Target
    *
    * @name graphite.target
    *
    * @param target Graphite Query. Nested queries are possible by adding the query reference (refId).
-   * @param targetFull (optional) Expanding the @target. Used in nested queries.
-   * @param hide (default `false`) Disable query on graph.
-   * @param textEditor (default `false`) Enable raw query mode.
-   * @param datasource (optional) Datasource.
+   * @param targetFull Expanding the @target. Used in nested queries.
+   * @param hide Disable query on graph.
+   * @param textEditor Enable raw query mode.
+   * @param datasource Datasource.
 
    * @return Panel target
    */

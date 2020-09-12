@@ -13,7 +13,6 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: make vendor-jsonnet
       - run:
           name: e2e tests with operator
           no_output_timeout: 30m

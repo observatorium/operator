@@ -16,8 +16,7 @@
           {
             alert: 'ThanosStoreGrpcErrorRate',
             annotations: {
-              description: 'Thanos Store {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests.',
-              summary: 'Thanos Store is failing to handle qrpcd requests.',
+              message: 'Thanos Store {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests.',
             },
             expr: |||
               (
@@ -35,8 +34,7 @@
           {
             alert: 'ThanosStoreSeriesGateLatencyHigh',
             annotations: {
-              description: 'Thanos Store {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for store series gate requests.',
-              summary: 'Thanos Store has high latency for store series gate requests.',
+              message: 'Thanos Store {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for store series gate requests.',
             },
             expr: |||
               (
@@ -53,8 +51,7 @@
           {
             alert: 'ThanosStoreBucketHighOperationFailures',
             annotations: {
-              description: 'Thanos Store {{$labels.job}} Bucket is failing to execute {{ $value | humanize }}% of operations.',
-              summary: 'Thanos Store Bucket is failing to execute operations.',
+              message: 'Thanos Store {{$labels.job}} Bucket is failing to execute {{ $value | humanize }}% of operations.',
             },
             expr: |||
               (
@@ -72,8 +69,7 @@
           {
             alert: 'ThanosStoreObjstoreOperationLatencyHigh',
             annotations: {
-              description: 'Thanos Store {{$labels.job}} Bucket has a 99th percentile latency of {{ $value }} seconds for the bucket operations.',
-              summary: 'Thanos Store is having high latency for bucket operations.',
+              message: 'Thanos Store {{$labels.job}} Bucket has a 99th percentile latency of {{ $value }} seconds for the bucket operations.',
             },
             expr: |||
               (

@@ -16,8 +16,7 @@
           {
             alert: 'ThanosQueryHttpRequestQueryErrorRateHigh',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of "query" requests.',
-              summary: 'Thanos Query is failing to handle requests.',
+              message: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of "query" requests.',
             },
             expr: |||
               (
@@ -34,8 +33,7 @@
           {
             alert: 'ThanosQueryHttpRequestQueryRangeErrorRateHigh',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of "query_range" requests.',
-              summary: 'Thanos Query is failing to handle requests.',
+              message: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of "query_range" requests.',
             },
             expr: |||
               (
@@ -52,8 +50,7 @@
           {
             alert: 'ThanosQueryGrpcServerErrorRate',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests.',
-              summary: 'Thanos Query is failing to handle requests.',
+              message: 'Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests.',
             },
             expr: |||
               (
@@ -71,8 +68,7 @@
           {
             alert: 'ThanosQueryGrpcClientErrorRate',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} is failing to send {{ $value | humanize }}% of requests.',
-              summary: 'Thanos Query is failing to send requests.',
+              message: 'Thanos Query {{$labels.job}} is failing to send {{ $value | humanize }}% of requests.',
             },
             expr: |||
               (
@@ -89,8 +85,7 @@
           {
             alert: 'ThanosQueryHighDNSFailures',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} have {{ $value | humanize }}% of failing DNS queries for store endpoints.',
-              summary: 'Thanos Query is having high number of DNS failures.',
+              message: 'Thanos Query {{$labels.job}} have {{ $value | humanize }}% of failing DNS queries for store endpoints.',
             },
             expr: |||
               (
@@ -107,8 +102,7 @@
           {
             alert: 'ThanosQueryInstantLatencyHigh',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for instant queries.',
-              summary: 'Thanos Query has high latency for queries.',
+              message: 'Thanos Query {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for instant queries.',
             },
             expr: |||
               (
@@ -125,8 +119,7 @@
           {
             alert: 'ThanosQueryRangeLatencyHigh',
             annotations: {
-              description: 'Thanos Query {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for range queries.',
-              summary: 'Thanos Query has high latency for queries.',
+              message: 'Thanos Query {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for range queries.',
             },
             expr: |||
               (
