@@ -53,6 +53,7 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
     queryFrontend: {
       image: obs.config.thanosImage,
       version: obs.config.thanosVersion,
+      replicas: obs.config.queryFrontend.replicas,
     },
     store: {
       image: obs.config.thanosImage,
@@ -76,16 +77,19 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
       retentionResolution5m: obs.config.compact.retentionResolution5m,
       retentionResolution1h: obs.config.compact.retentionResolution1h,
       enableDownsampling: obs.config.compact.enableDownsampling,
+      replicas: obs.config.compact.replicas,
     },
     rule: {
       image: obs.config.thanosImage,
       version: obs.config.thanosVersion,
       volumeClaimTemplate: obs.config.rule.volumeClaimTemplate,
+      replicas: obs.config.rule.replicas,
     },
     receivers: {
       image: obs.config.thanosImage,
       version: obs.config.thanosVersion,
       volumeClaimTemplate: obs.config.receivers.volumeClaimTemplate,
+      replicas: obs.config.receivers.replicas,
     },
     thanosReceiveController: {
       image: obs.config.thanosReceiveController.image,
@@ -93,6 +97,7 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
     },
     api: {
       image: obs.config.api.image,
+      replicas: obs.config.api.replicas,
       version: obs.config.api.version,
       rbac: {
         roles: [
@@ -161,6 +166,7 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
     query: {
       image: obs.config.thanosImage,
       version: obs.config.thanosVersion,
+      replicas: obs.config.query.replicas,
     },
     loki: {
       image: obs.config.loki.image,

@@ -27,6 +27,7 @@ spec:
         - metrics
         tenants:
         - test
+    replicas: 1
     tenants:
     - id: 1610b0c3-c509-4592-a256-a1871353dbfa
       name: test
@@ -49,6 +50,7 @@ spec:
   compact:
     enableDownsampling: false
     image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    replicas: 1
     retentionResolution1h: 1s
     retentionResolution5m: 1s
     retentionResolutionRaw: 14d
@@ -92,12 +94,15 @@ spec:
       name: thanos-objectstorage
   query:
     image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    replicas: 1
     version: master-2020-08-12-70f89d83
   queryFrontend:
     image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    replicas: 1
     version: master-2020-08-12-70f89d83
   receivers:
     image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    replicas: 1
     version: master-2020-08-12-70f89d83
     volumeClaimTemplate:
       spec:
@@ -108,6 +113,7 @@ spec:
             storage: 50Gi
   rule:
     image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    replicas: 1
     version: master-2020-08-12-70f89d83
     volumeClaimTemplate:
       spec:

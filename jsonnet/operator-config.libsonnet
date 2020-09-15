@@ -1,4 +1,4 @@
-local default = import 'default-config.libsonnet';
+local default = import 'github.com/observatorium/environments/base/default-config.libsonnet';
 local cr = import 'generic-operator/config';
 local objectStorageConfig = cr.spec.objectStorageConfig;
 local thanosObjectStorageConfig = objectStorageConfig.thanos;
@@ -15,6 +15,7 @@ cr.spec {
     version: if std.objectHas(cr.spec.compact, 'version') then cr.spec.compact.version else default.compact.version,
     objectStorageConfig: thanosObjectStorageConfig,
     logLevel: 'info',
+    replicas: if std.objectHas(cr.spec.compact, 'replicas') then cr.spec.compact.replicas else default.compact.replicas,
   },
   thanosReceiveController+:: {
     image: if std.objectHas(cr.spec, 'thanosReceiveController') && std.objectHas(cr.spec.thanosReceiveController, 'image') then cr.spec.thanosReceiveController.image else default.thanosReceiveController.image,
@@ -26,12 +27,14 @@ cr.spec {
     version: if std.objectHas(cr.spec.receivers, 'version') then cr.spec.receivers.version else default.receivers.version,
     hashrings: hashrings,
     objectStorageConfig: thanosObjectStorageConfig,
+    replicas: if std.objectHas(cr.spec.receivers, 'replicas') then cr.spec.receivers.replicas else default.receivers.replicas,
     logLevel: 'info',
     debug: '',
   },
   rule+:: {
     image: if std.objectHas(cr.spec.rule, 'image') then cr.spec.rule.image else default.rule.image,
     version: if std.objectHas(cr.spec.rule, 'version') then cr.spec.rule.version else default.rule.version,
+    replicas: if std.objectHas(cr.spec.rule, 'replicas') then cr.spec.rule.replicas else default.rule.replicas,
     objectStorageConfig: thanosObjectStorageConfig,
   },
   store+:: {
@@ -51,10 +54,12 @@ cr.spec {
   query+:: {
     image: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'image') then cr.spec.query.image else default.query.image,
     version: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'version') then cr.spec.query.version else default.query.version,
+    replicas: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'replicas') then cr.spec.query.replicas else default.query.replicas,
   },
   queryFrontend+:: {
     image: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'image') then cr.spec.queryFrontend.image else default.queryFrontend.image,
     version: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'version') then cr.spec.queryFrontend.version else default.queryFrontend.version,
+    replicas: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'replicas') then cr.spec.queryFrontend.replicas else default.queryFrontend.replicas,
   },
   apiQuery+:: {
     image: if std.objectHas(cr.spec, 'apiQuery') && std.objectHas(cr.spec.apiQuery, 'image') then cr.spec.apiQuery.image else default.apiQuery.image,
@@ -66,6 +71,7 @@ cr.spec {
     rbac: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'rbac') then cr.spec.api.rbac else default.api.rbac,
     tenants: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tenants') then { tenants: cr.spec.api.tenants } else default.api.tenants,
     tls: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tls') then cr.spec.api.tls else {},
+    replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else default.api.replicas,
   },
   loki+:: if std.objectHas(cr.spec, 'loki') then {
     image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else default.loki.image,

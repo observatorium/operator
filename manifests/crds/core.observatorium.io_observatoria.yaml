@@ -124,6 +124,10 @@ spec:
                   - roleBindings
                   - roles
                   type: object
+                replicas:
+                  description: Number of API replicas.
+                  format: int32
+                  type: integer
                 tenants:
                   description: Tenants is a slice of tenants for the Observatorium
                     API.
@@ -219,6 +223,10 @@ spec:
                 image:
                   description: Thanos image
                   type: string
+                replicas:
+                  description: Number of Compact replicas.
+                  format: int32
+                  type: integer
                 retentionResolution1h:
                   description: RetentionResolutionRaw
                   type: string
@@ -595,6 +603,10 @@ spec:
                 image:
                   description: Thanos image
                   type: string
+                replicas:
+                  description: Number of Query replicas.
+                  format: int32
+                  type: integer
                 version:
                   description: Version of Thanos image to be deployed.
                   type: string
@@ -619,6 +631,10 @@ spec:
                 image:
                   description: Thanos image
                   type: string
+                replicas:
+                  description: Number of Receiver replicas.
+                  format: int32
+                  type: integer
                 version:
                   description: Version of Thanos image to be deployed.
                   type: string
@@ -768,6 +784,10 @@ spec:
                 image:
                   description: Thanos image
                   type: string
+                replicas:
+                  description: Number of Rule replicas.
+                  format: int32
+                  type: integer
                 version:
                   description: Version of Thanos image to be deployed.
                   type: string
