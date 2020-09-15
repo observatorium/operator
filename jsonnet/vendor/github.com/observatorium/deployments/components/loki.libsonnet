@@ -56,6 +56,9 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
     loki.defaultConfig.ingester.lifecycler.ring.kvstore.store == 'memberlist' &&
     std.member(['distributor', 'ingester', 'querier'], component),
 
+  local isStatefulSet(component) =
+    std.member(['ingester', 'querier'], component),
+
   local newLokiContainer(name, component, config) =
     local deployment = k.apps.v1.deployment;
     local container = deployment.mixin.spec.template.spec.containersType;
@@ -295,7 +298,7 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
           replication_factor: 1,
         },
       },
-      max_transfer_retries: 60,
+      max_transfer_retries: 0,
     },
     ingester_client: {
       grpc_client_config: {
@@ -409,12 +412,21 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
       replicas: error 'must provide replicas per component',
     },
     manifests+:: {
-      [name + '-deployment']+: {
+      [normalizedName(name) + '-deployment']+: {
         spec+: {
           replicas: l.config.replicas[name],
         },
       }
       for name in std.objectFields(l.config.replicas)
+      if !isStatefulSet(name)
+    } + {
+      [normalizedName(name) + '-statefulset']+: {
+        spec+: {
+          replicas: l.config.replicas[name],
+        },
+      }
+      for name in std.objectFields(l.config.replicas)
+      if isStatefulSet(name)
     },
   },
 
@@ -611,10 +623,10 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
   withVolumeClaimTemplate:: {
     local l = self,
     config+:: {
-      volumeClaimTemplate: error 'must provide volumeClaimTemplate for ingesters',
+      volumeClaimTemplate: error 'must provide volumeClaimTemplate for ingesters and queriers',
     },
     manifests+:: {
-      [name + '-deployment']+: {
+      [normalizedName(name) + '-statefulset']+: {
         spec+: {
           template+: {
             spec+: {
@@ -630,7 +642,7 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
         },
       }
       for name in std.objectFields(l.components)
-      if name == 'ingester'
+      if isStatefulSet(name)
     },
   },
 
@@ -639,7 +651,7 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
     serviceMonitors: {},
 
     manifests+:: {
-      [name + '-service-monitor']: {
+      [normalizedName(name) + '-service-monitor']: {
         apiVersion: 'monitoring.coreos.com/v1',
         kind: 'ServiceMonitor',
         metadata+: {
@@ -650,7 +662,7 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
         spec: {
           selector: {
             matchLabels: l.config.podLabelSelector {
-              'app.kubernetes.io/component': l.config.name + '-' + name,
+              'app.kubernetes.io/component': normalizedName(name),
             },
           },
           endpoints: [
@@ -685,18 +697,37 @@ local k = (import 'ksonnet/ksonnet.beta.4/k.libsonnet');
         },
       }
       for name in std.objectFields(l.config.resources)
+      if !isStatefulSet(name)
+    } + {
+      [normalizedName(name) + '-statefulset']+: {
+        spec+: {
+          template+: {
+            spec+: {
+              containers: [
+                c {
+                  resources: l.config.resources[name],
+                }
+                for c in super.containers
+              ],
+            },
+          },
+        },
+      }
+      for name in std.objectFields(l.config.resources)
+      if isStatefulSet(name)
     },
   },
 
   manifests+:: {
     'config-map': loki.configmap,
   } + {
-    [normalizedName(name) + '-deployment']:
-      if name == 'ingester' then
-        newStatefulSet(name, loki.components[name])
-      else
-        newDeployment(name, loki.components[name])
+    [normalizedName(name) + '-deployment']: newDeployment(name, loki.components[name])
     for name in std.objectFields(loki.components)
+    if !isStatefulSet(name)
+  } + {
+    [normalizedName(name) + '-statefulset']: newStatefulSet(name, loki.components[name])
+    for name in std.objectFields(loki.components)
+    if isStatefulSet(name)
   } + {
     [normalizedName(name) + '-grpc-service']: newGrpcService(name)
     for name in std.objectFields(loki.components)
