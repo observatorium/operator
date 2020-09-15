@@ -8,5 +8,5 @@ Currently, this includes:
 0. operator itself.
 0. example configuration for deploying Observatorium via the Observatorium Operator.
 
-For more information on the operator, see the [Observatorium Operator documentation](./doc/operator/deploy-operator.md).
+For more information on the operator, see the [Observatorium Operator documentation](./docs/operator/deploy-operator.md).
 
