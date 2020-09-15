@@ -6,6 +6,6 @@ Operator deploying the Observatorium project.
 Currently, this includes:
 
 1. the operator itself; and
-0. example configuration for deploying Observatorium via the Observatorium Operator.
+1. example configuration for deploying Observatorium via the Observatorium Operator.
 
 For more information on the operator, see the [Observatorium Operator documentation](./docs/operator/deploy-operator.md).
