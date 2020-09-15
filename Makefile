@@ -53,6 +53,12 @@ container-push: container-build
 vendor-jsonnet: $(JB)
 	cd jsonnet; $(JB) install
 
+jsonnet-update: $(JB)
+	cd jsonnet; $(JB) update
+
+jsonnet-update-deployments: $(JB)
+	cd jsonnet; $(JB) update github.com/observatorium/deployments
+
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
