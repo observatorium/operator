@@ -1,4 +1,4 @@
-local default = import 'github.com/observatorium/environments/base/default-config.libsonnet';
+local default = import 'github.com/observatorium/deployments/environments/base/default-config.libsonnet';
 local cr = import 'generic-operator/config';
 local objectStorageConfig = cr.spec.objectStorageConfig;
 local thanosObjectStorageConfig = objectStorageConfig.thanos;
