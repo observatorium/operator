@@ -32,16 +32,14 @@ type ObservatoriumSpec struct {
 	ThanosReceiveController ThanosReceiveControllerSpec `json:"thanosReceiveController,omitempty"`
 	// Thanos ThanosPersistentSpec
 	Receivers ReceiversSpec `json:"receivers"`
-	// Thanos QueryCache
-	QueryCache QueryCacheSpec `json:"queryCache,omitempty"`
+	// Thanos QueryFrontend
+	QueryFrontend QueryFrontendSpec `json:"queryFrontend,omitempty"`
 	// Thanos StoreSpec
 	Store StoreSpec `json:"store"`
 	// Thanos RulerSpec
 	Rule RuleSpec `json:"rule"`
 	// API
 	API APISpec `json:"api,omitempty"`
-	// API Query
-	APIQuery APIQuerySpec `json:"apiQuery,omitempty"`
 	// Query
 	Query QuerySpec `json:"query,omitempty"`
 	// Loki
@@ -244,13 +242,6 @@ type APISpec struct {
 	Tenants []APITenant `json:"tenants"`
 }
 
-type APIQuerySpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
-}
-
 type QuerySpec struct {
 	// Thanos image
 	Image string `json:"image,omitempty"`
@@ -294,12 +285,12 @@ type VolumeClaimTemplate struct {
 	Spec v1.PersistentVolumeClaimSpec `json:"spec"`
 }
 
-type QueryCacheSpec struct {
-	// Thanos Query Cache image
+type QueryFrontendSpec struct {
+	// Thanos Query Frontend image
 	Image string `json:"image,omitempty"`
-	// Number of Query Cache replicas.
+	// Number of Query Frontend replicas.
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Query Cache image to be deployed.
+	// Version of Query Frontend image to be deployed.
 	Version string `json:"version,omitempty"`
 }
 
