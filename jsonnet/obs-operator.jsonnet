@@ -14,7 +14,19 @@ local patchObs = obs {
   rule+::
     t.rule.withVolumeClaimTemplate {
       config+:: obs.rule.config,
-    },
+    } + (if std.objectHas(obs.rule.config, 'alertmanagersURL') then 
+      t.rule.withAlertmanagers {
+        config+:: {
+          alertmanagersURL: obs.rule.config.alertmanagersURL,
+        }
+      } else {}
+    ) + (if std.objectHas(obs.rule.config, 'rulesConfig') then 
+      t.rule.withRules {
+        config+:: {
+          rulesConfig: obs.rule.config.rulesConfig
+        }
+      } else {}
+    ),
 
   receivers+:: {
     [hashring.hashring]+:
@@ -36,6 +48,7 @@ local patchObs = obs {
     config+:: obs.loki.config,
   },
 };
+std.trace('cond is true returning '+ std.toString(patchObs.manifests), { a: false })
 
 {
   manifests: std.mapWithKey(function(k, v) v {
