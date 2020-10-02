@@ -48,7 +48,6 @@ local patchObs = obs {
     config+:: obs.loki.config,
   },
 };
-std.trace('cond is true returning '+ std.toString(patchObs.manifests), { a: false })
 
 {
   manifests: std.mapWithKey(function(k, v) v {
