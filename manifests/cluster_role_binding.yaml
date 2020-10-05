@@ -12,6 +12,5 @@ roleRef:
   name: observatorium-operator
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: observatorium-operator
   namespace: default
-
