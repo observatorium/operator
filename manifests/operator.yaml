@@ -17,6 +17,7 @@ spec:
       labels:
         control-plane: observatorium-operator
     spec:
+      serviceAccountName: observatorium-operator
       containers:
       - name: observatorium-operator
         image: quay.io/observatorium/observatorium-operator:latest
