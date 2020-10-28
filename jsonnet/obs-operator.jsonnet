@@ -61,5 +61,12 @@ local patchObs = obs {
         uid: config.uid,
       }],
     },
+    spec+: if (v.kind == 'StatefulSet' || v.kind == 'Deployment') then {
+      template+: {
+        spec+:{
+          nodeSelector+: { 'kubernetes.io/os': 'linux' }, // TODO: replace with the nodeSelector from the CustomResource
+        },
+      },
+    } else {},
   }, patchObs.manifests),
 }
