@@ -45,6 +45,9 @@ type ObservatoriumSpec struct {
 	// Loki
 	// +optional
 	Loki *LokiSpec `json:"loki,omitempty"`
+	// NodeSelector applies to all components
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ObjectStorageConfig struct {

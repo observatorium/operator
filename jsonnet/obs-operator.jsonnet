@@ -61,5 +61,12 @@ local patchObs = obs {
         uid: config.uid,
       }],
     },
+    spec+: if (std.objectHas(obs.config, 'nodeSelector') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
+      template+: {
+        spec+:{
+          nodeSelector: obs.config.nodeSelector,
+        },
+      },
+    } else {},
   }, patchObs.manifests),
 }
