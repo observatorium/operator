@@ -439,7 +439,7 @@ spec:
             nodeSelector:
               additionalProperties:
                 type: string
-              description: NodeSelector applies to all components
+              description: NodeSelector causes all components to be scheduled on nodes with matching labels.
               type: object
             objectStorageConfig:
               description: Objest Storage Configuration
