@@ -61,12 +61,22 @@ local patchObs = obs {
         uid: config.uid,
       }],
     },
-    spec+: if (std.objectHas(obs.config, 'nodeSelector') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
-      template+: {
-        spec+:{
-          nodeSelector: obs.config.nodeSelector,
+    spec+: (
+      if (std.objectHas(obs.config, 'nodeSelector') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
+        template+: {
+          spec+:{
+            nodeSelector: obs.config.nodeSelector,
+          },
         },
-      },
-    } else {},
+      } else {}
+    ) + (
+      if (std.objectHas(obs.config, 'affinity') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
+        template+: {
+          spec+:{
+            affinity: obs.config.affinity,
+          },
+        },
+      } else {}
+    ),
   }, patchObs.manifests),
 }
