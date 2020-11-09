@@ -45,6 +45,12 @@ type ObservatoriumSpec struct {
 	// Loki
 	// +optional
 	Loki *LokiSpec `json:"loki,omitempty"`
+	// NodeSelector causes all components to be scheduled on nodes with matching labels.
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Affinity causes all components to be scheduled on nodes with matching rules.
+	// +optional
+	Affinity *v1.Affinity `json:"affinity,omitempty"`
 }
 
 type ObjectStorageConfig struct {

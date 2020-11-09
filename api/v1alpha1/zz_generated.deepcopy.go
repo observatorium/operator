@@ -20,6 +20,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -295,6 +296,18 @@ func (in *ObservatoriumSpec) DeepCopyInto(out *ObservatoriumSpec) {
 	if in.Loki != nil {
 		in, out := &in.Loki, &out.Loki
 		*out = new(LokiSpec)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.NodeSelector != nil {
+		in, out := &in.NodeSelector, &out.NodeSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
 		(*in).DeepCopyInto(*out)
 	}
 }
