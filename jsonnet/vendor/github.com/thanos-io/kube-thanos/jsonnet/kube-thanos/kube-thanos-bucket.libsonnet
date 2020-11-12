@@ -1,105 +1,127 @@
-local k = import 'ksonnet/ksonnet.beta.4/k.libsonnet';
+// These are the defaults for this components configuration.
+// When calling the function to generate the component's manifest,
+// you can pass an object structured like the default to overwrite default values.
+local defaults = {
+  local defaults = self,
+  name: 'thanos-bucket',
+  namespace: error 'must provide namespace',
+  version: error 'must provide version',
+  image: error 'must provide image',
+  objectStorageConfig: error 'must provide objectStorageConfig',
+  resources: {},
+  logLevel: 'info',
+  ports: {
+    http: 10902,
+  },
+  tracing: {},
 
-{
-  local tb = self,
-
-  config:: {
-    name: error 'must provide name',
-    namespace: error 'must provide namespace',
-    version: error 'must provide version',
-    image: error 'must provide image',
-    objectStorageConfig: error 'must provide objectStorageConfig',
-    logLevel: 'info',
-
-    commonLabels:: {
-      'app.kubernetes.io/name': 'thanos-bucket',
-      'app.kubernetes.io/instance': tb.config.name,
-      'app.kubernetes.io/version': tb.config.version,
-      'app.kubernetes.io/component': 'object-store-bucket-debugging',
-    },
-
-    podLabelSelector:: {
-      [labelName]: tb.config.commonLabels[labelName]
-      for labelName in std.objectFields(tb.config.commonLabels)
-      if !std.setMember(labelName, ['app.kubernetes.io/version'])
-    },
+  commonLabels:: {
+    'app.kubernetes.io/name': 'thanos-bucket',
+    'app.kubernetes.io/instance': defaults.name,
+    'app.kubernetes.io/version': defaults.version,
+    'app.kubernetes.io/component': 'object-store-bucket-debugging',
   },
 
-  service:
-    local service = k.core.v1.service;
-    local ports = service.mixin.spec.portsType;
+  podLabelSelector:: {
+    [labelName]: defaults.commonLabels[labelName]
+    for labelName in std.objectFields(defaults.commonLabels)
+    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+  },
+};
 
-    service.new(
-      tb.config.name,
-      tb.config.podLabelSelector,
-      [ports.newNamed('http', 10902, 'http')],
-    ) +
-    service.mixin.metadata.withNamespace(tb.config.namespace) +
-    service.mixin.metadata.withLabels(tb.config.commonLabels),
+function(params) {
+  local tb = self,
+
+  // Combine the defaults and the passed params to make the component's config.
+  config:: defaults + params,
+  // Safety checks for combined config of defaults and params
+  assert std.isNumber(tb.config.replicas) && tb.config.replicas >= 0 : 'thanos bucket replicas has to be number >= 0',
+  assert std.isObject(tb.config.resources),
+
+  service:
+    {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: tb.config.name,
+        namespace: tb.config.namespace,
+        labels: tb.config.commonLabels,
+      },
+      spec: {
+        ports: [
+          {
+            assert std.isString(name),
+            assert std.isNumber(tb.config.ports[name]),
+
+            name: name,
+            port: tb.config.ports[name],
+            targetPort: tb.config.ports[name],
+          }
+          for name in std.objectFields(tb.config.ports)
+        ],
+        selector: tb.config.podLabelSelector,
+      },
+    },
 
   deployment:
-    local deployment = k.apps.v1.deployment;
-    local container = deployment.mixin.spec.template.spec.containersType;
-    local containerEnv = container.envType;
-
-    local c =
-      container.new('thanos-bucket', tb.config.image) +
-      container.withTerminationMessagePolicy('FallbackToLogsOnError') +
-      container.withArgs([
+    local container = {
+      name: 'thanos-bucket',
+      image: tb.config.image,
+      args: [
         'tools',
         'bucket',
         'web',
         '--log.level=' + tb.config.logLevel,
         '--objstore.config=$(OBJSTORE_CONFIG)',
-      ]) +
-      container.withEnv([
-        containerEnv.fromSecretRef(
-          'OBJSTORE_CONFIG',
-          tb.config.objectStorageConfig.name,
-          tb.config.objectStorageConfig.key,
-        ),
-      ]) +
-      container.withPorts([
-        { name: 'http', containerPort: tb.service.spec.ports[0].port },
-      ]) +
-      container.mixin.livenessProbe +
-      container.mixin.livenessProbe.withPeriodSeconds(30) +
-      container.mixin.livenessProbe.withFailureThreshold(4) +
-      container.mixin.livenessProbe.httpGet.withPort(tb.service.spec.ports[0].port) +
-      container.mixin.livenessProbe.httpGet.withScheme('HTTP') +
-      container.mixin.livenessProbe.httpGet.withPath('/-/healthy') +
-      container.mixin.readinessProbe +
-      container.mixin.readinessProbe.withPeriodSeconds(5) +
-      container.mixin.readinessProbe.withFailureThreshold(20) +
-      container.mixin.readinessProbe.httpGet.withPort(tb.service.spec.ports[0].port) +
-      container.mixin.readinessProbe.httpGet.withScheme('HTTP') +
-      container.mixin.readinessProbe.httpGet.withPath('/-/ready');
+      ] + (
+        if std.length(tb.config.tracing) > 0 then [
+          '--tracing.config=' + std.manifestYamlDoc(
+            { config+: { service_name: defaults.name } } + tb.config.tracing
+          ),
+        ] else []
+      ),
+      env: [
+        { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
+          key: tb.config.objectStorageConfig.key,
+          name: tb.config.objectStorageConfig.name,
+        } } },
+      ],
+      ports: [
+        { name: name, containerPort: tb.config.ports[name] }
+        for name in std.objectFields(tb.config.ports)
+      ],
+      livenessProbe: { failureThreshold: 4, periodSeconds: 30, httpGet: {
+        scheme: 'HTTP',
+        port: tb.config.ports.http,
+        path: '/-/healthy',
+      } },
+      readinessProbe: { failureThreshold: 20, periodSeconds: 5, httpGet: {
+        scheme: 'HTTP',
+        port: tb.config.ports.http,
+        path: '/-/ready',
+      } },
+      resources: if tb.config.resources != {} then tb.config.resources else {},
+      terminationMessagePolicy: 'FallbackToLogsOnError',
+    };
 
-    deployment.new(tb.config.name, 1, c, tb.config.commonLabels) +
-    deployment.mixin.metadata.withNamespace(tb.config.namespace) +
-    deployment.mixin.metadata.withLabels(tb.config.commonLabels) +
-    deployment.mixin.spec.selector.withMatchLabels(tb.config.podLabelSelector) +
-    deployment.mixin.spec.template.spec.withTerminationGracePeriodSeconds(120),
-
-  withResources:: {
-    local tb = self,
-    config+:: {
-      resources: error 'must provide resources',
-    },
-
-    deployment+: {
-      spec+: {
-        template+: {
-          spec+: {
-            containers: [
-              if c.name == 'thanos-bucket' then c {
-                resources: tb.config.resources,
-              } else c
-              for c in super.containers
-            ],
+    {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: tb.config.name,
+        namespace: tb.config.namespace,
+        labels: tb.config.commonLabels,
+      },
+      spec: {
+        replicas: 1,
+        selector: { matchLabels: tb.config.podLabelSelector },
+        template: {
+          metadata: { labels: tb.config.commonLabels },
+          spec: {
+            containers: [container],
+            terminationGracePeriodSeconds: 120,
           },
         },
       },
     },
-  },
 }

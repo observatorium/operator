@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/instance: observatorium-xyz
     app.kubernetes.io/name: observatorium-api
     app.kubernetes.io/part-of: observatorium
-    app.kubernetes.io/version: master-2020-09-08-v0.1.1-142-g61a908f
+    app.kubernetes.io/version: master-2020-11-02-v0.1.1-192-ge324057
   name: observatorium-xyz-observatorium-api
   namespace: observatorium
 spec:
@@ -28,7 +28,7 @@ spec:
         app.kubernetes.io/instance: observatorium-xyz
         app.kubernetes.io/name: observatorium-api
         app.kubernetes.io/part-of: observatorium
-        app.kubernetes.io/version: master-2020-09-08-v0.1.1-142-g61a908f
+        app.kubernetes.io/version: master-2020-11-02-v0.1.1-192-ge324057
     spec:
       containers:
       - args:
@@ -42,7 +42,8 @@ spec:
         - --logs.write.endpoint=http://observatorium-xyz-loki-distributor-http.observatorium.svc.cluster.local:3100
         - --rbac.config=/etc/observatorium/rbac.yaml
         - --tenants.config=/etc/observatorium/tenants.yaml
-        image: quay.io/observatorium/observatorium:master-2020-09-08-v0.1.1-142-g61a908f
+        - --middleware.rate-limiter.grpc-address=observatorium-xyz-gubernator.observatorium.svc.cluster.local:8081
+        image: quay.io/observatorium/observatorium:master-2020-11-02-v0.1.1-192-ge324057
         livenessProbe:
           failureThreshold: 10
           httpGet:
@@ -63,6 +64,7 @@ spec:
             port: 8081
             scheme: HTTP
           periodSeconds: 5
+        resources: {}
         volumeMounts:
         - mountPath: /etc/observatorium/rbac.yaml
           name: rbac
@@ -72,6 +74,11 @@ spec:
           name: tenants
           readOnly: true
           subPath: tenants.yaml
+        - mountPath: /var/run/tls/test/service-ca.crt
+          name: test-tls-configmap
+          readOnly: true
+          subPath: service-ca.crt
+      serviceAccountName: observatorium-xyz-observatorium-api
       volumes:
       - configMap:
           name: observatorium-xyz-observatorium-api
@@ -79,3 +86,6 @@ spec:
       - name: tenants
         secret:
           secretName: observatorium-xyz-observatorium-api
+      - configMap:
+          name: test-ca-tls
+        name: test-tls-configmap

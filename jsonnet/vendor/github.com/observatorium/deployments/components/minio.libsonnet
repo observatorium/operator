@@ -1,9 +1,18 @@
-{
+// These are the defaults for this components configuration.
+// When calling the function to generate the component's manifest,
+// you can pass an object structured like the default to overwrite default values.
+local defaults = {
+  local defaults = self,
+  namespace: error 'must provide namespace',
+
+  commonLabels:: { 'app.kubernetes.io/name': 'minio' },
+};
+
+function(params) {
   local minio = self,
 
-  config:: {
-    namespace: error 'must provide namespace',
-  },
+  // Combine the defaults and the passed params to make the component's config.
+  config:: defaults + params,
 
   deployment: {
     apiVersion: 'apps/v1',
@@ -14,18 +23,12 @@
     },
     spec: {
       selector: {
-        matchLabels: {
-          'app.kubernetes.io/name': 'minio',
-        },
+        matchLabels: minio.config.commonLabels,
       },
-      strategy: {
-        type: 'Recreate',
-      },
+      strategy: { type: 'Recreate' },
       template: {
         metadata: {
-          labels: {
-            'app.kubernetes.io/name': 'minio',
-          },
+          labels: minio.config.commonLabels,
         },
         spec: {
           containers: [
@@ -52,26 +55,17 @@
               image: 'minio/minio',
               name: 'minio',
               ports: [
-                {
-                  containerPort: 9000,
-                },
+                { containerPort: 9000 },
               ],
               volumeMounts: [
-                {
-                  mountPath: '/storage',
-                  name: 'storage',
-                },
+                { mountPath: '/storage', name: 'storage' },
               ],
             },
           ],
-          volumes: [
-            {
-              name: 'storage',
-              persistentVolumeClaim: {
-                claimName: 'minio',
-              },
-            },
-          ],
+          volumes: [{
+            name: 'storage',
+            persistentVolumeClaim: { claimName: 'minio' },
+          }],
         },
       },
     },
@@ -81,20 +75,14 @@
     apiVersion: 'v1',
     kind: 'PersistentVolumeClaim',
     metadata: {
-      labels: {
-        'app.kubernetes.io/name': 'minio',
-      },
+      labels: minio.config.commonLabels,
       name: 'minio',
       namespace: minio.config.namespace,
     },
     spec: {
-      accessModes: [
-        'ReadWriteOnce',
-      ],
+      accessModes: ['ReadWriteOnce'],
       resources: {
-        requests: {
-          storage: '10Gi',
-        },
+        requests: { storage: '10Gi' },
       },
     },
   },
@@ -142,24 +130,10 @@
     },
     spec: {
       ports: [
-        {
-          port: 9000,
-          protocol: 'TCP',
-          targetPort: 9000,
-        },
+        { port: 9000, protocol: 'TCP', targetPort: 9000 },
       ],
-      selector: {
-        'app.kubernetes.io/name': 'minio',
-      },
+      selector: minio.config.commonLabels,
       type: 'ClusterIP',
     },
-  },
-
-  manifests+:: {
-    'minio-deployment': minio.deployment,
-    'minio-pvc': minio.pvc,
-    'minio-secret-thanos': minio.secretThanos,
-    'minio-secret-loki': minio.secretLoki,
-    'minio-service': minio.service,
   },
 }

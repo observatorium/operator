@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/kakkoyun/kube-thanos.git",
+          "subdir": "jsonnet/kube-thanos"
+        }
+      },
+      "version": "e047e43775480ffbe89985ff734c1313870031d7",
+      "sum": "zFXI+vF2rNeIXsOU0/X+aTv/YPa6ahH/ilzptdEg6Jg="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/observatorium/observatorium.git",
+          "subdir": "jsonnet/lib"
+        }
+      },
+      "version": "cd90bd3d69cd1e2a86311f8589812f60770df877",
+      "sum": "COiE/nS+SDkbOomr5Q0nj9gD1O/BBCtiGHFjlNgjsU4=",
+      "name": "observatorium"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/observatorium/thanos-receive-controller.git",
+          "subdir": "jsonnet/lib"
+        }
+      },
+      "version": "429ae1f5f2ce5f7c4234251e97df6007aeb4a29a",
+      "sum": "sqF9titAn3N2HHKY9mCzbZ+d/xL5ZBQ/ej/t190jY6o=",
+      "name": "thanos-receive-controller"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/observatorium/up.git",
+          "subdir": "jsonnet"
+        }
+      },
+      "version": "1a8a104bd7842d7235902af14c5a03252c3144ff",
+      "sum": "0FKabnXd0rMeu8YpkkopEOknqBf5PLq/DIIDd0ve7cU=",
+      "name": "up"
+    }
+  ],
+  "legacyImports": false
+}
