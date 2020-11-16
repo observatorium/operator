@@ -1,4 +1,4 @@
-module github.com/observatorium/operator
+module github.com/open-cluster-management/observatorium-operator 
 
 go 1.14
 

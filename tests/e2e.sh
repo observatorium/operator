@@ -7,6 +7,11 @@ ARTIFACT_DIR="${ARTIFACT_DIR:-/tmp/artifacts}"
 KUBECTL="${KUBECTL:-./kubectl}"
 OS_TYPE=$(echo `uname -s` | tr '[:upper:]' '[:lower:]')
 
+SED_CMD="${SED_CMD:-sed}"
+
+# OPERATOR_IMAGE_NAME can be set in the env to override calculated value
+OPERATOR_IMAGE_NAME="${OPERATOR_IMAGE_NAME:-quay.io/observatorium/observatorium-operator}"
+
 kind() {
     curl -LO https://storage.googleapis.com/kubernetes-release/release/"$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)"/bin/$OS_TYPE/amd64/kubectl
     curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.8.1/kind-$OS_TYPE-amd64
@@ -57,9 +62,12 @@ wait_for_cr() {
     fi
 }
 
-deploy_operator() {
+load_operator() {
     docker build -t quay.io/observatorium/observatorium-operator:latest .
     ./kind load docker-image quay.io/observatorium/observatorium-operator:latest
+}
+
+deploy_operator() {
     $KUBECTL apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
     $KUBECTL apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0prometheusruleCustomResourceDefinition.yaml
     $KUBECTL create ns observatorium-minio || true
@@ -73,7 +81,8 @@ deploy_operator() {
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-secret.yaml
     $KUBECTL apply -f manifests/crds
-    $KUBECTL apply -f manifests/
+    $SED_CMD -e "s,quay.io/observatorium/observatorium-operator,$OPERATOR_IMAGE_NAME," manifests/operator.yaml 
+    $KUBECTL apply -n default -f manifests/
     $KUBECTL apply -n observatorium -f example/manifests
     wait_for_cr observatorium-xyz
 }
@@ -116,14 +125,14 @@ run_test() {
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium-minio deploy/minio || (must_gather "$ARTIFACT_DIR" && exit 1)
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium deploy/observatorium-xyz-thanos-query-frontend || (must_gather "$ARTIFACT_DIR" && exit 1)
     $KUBECTL wait --for=condition=available --timeout=10m -n observatorium deploy/observatorium-xyz-loki-query-frontend || (must_gather "$ARTIFACT_DIR" && exit 1)
-    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
-    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-up-metrics"$suffix".yaml
+    $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-configmap.yaml
+    $KUBECTL apply -n default -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-up-metrics"$suffix".yaml
 
     sleep 5
 
     # This should wait for ~2min for the job to finish.
     $KUBECTL wait --for=condition=complete --timeout=5m -n default job/observatorium-up-metrics"$suffix" || (must_gather "$ARTIFACT_DIR" && exit 1)
-    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-up-logs"$suffix".yaml
+    $KUBECTL apply -n default -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-up-logs"$suffix".yaml
 
     sleep 5
 
@@ -185,3 +194,4 @@ delete-cr)
     echo "usage: $(basename "$0") { kind | deploy | test | deploy-operator | delete-cr }"
     ;;
 esac
+
