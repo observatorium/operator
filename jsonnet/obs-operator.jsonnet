@@ -1,4 +1,4 @@
-local t = (import 'github.com/thanos-io/kube-thanos/jsonnet/kube-thanos/thanos.libsonnet');
+local t = (import 'github.com/open-cluster-management/kube-thanos/jsonnet/kube-thanos/thanos.libsonnet');
 local loki = import 'github.com/observatorium/deployments/components/loki.libsonnet';
 local config = import './operator-config.libsonnet';
 local obs = ((import 'github.com/observatorium/deployments/components/observatorium.libsonnet') + {
@@ -23,7 +23,8 @@ local patchObs = obs {
     ) + (if std.objectHas(obs.rule.config, 'rulesConfig') then 
       t.rule.withRules {
         config+:: {
-          rulesConfig: obs.rule.config.rulesConfig
+          rulesConfig: obs.rule.config.rulesConfig,
+          reloaderImage: obs.rule.config.reloaderImage,
         }
       } else {}
     ),

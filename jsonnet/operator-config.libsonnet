@@ -33,6 +33,7 @@ cr.spec {
   },
   rule+:: {
     image: if std.objectHas(cr.spec.rule, 'image') then cr.spec.rule.image else default.rule.image,
+    reloaderImage: if std.objectHas(cr.spec.rule, 'reloaderImage') then cr.spec.rule.reloaderImage else default.rule.reloaderImage,
     version: if std.objectHas(cr.spec.rule, 'version') then cr.spec.rule.version else default.rule.version,
     replicas: if std.objectHas(cr.spec.rule, 'replicas') then cr.spec.rule.replicas else default.rule.replicas,
     objectStorageConfig: thanosObjectStorageConfig,

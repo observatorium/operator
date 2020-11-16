@@ -9,6 +9,16 @@
         }
       },
       "version": "master"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/open-cluster-management/kube-thanos.git",
+          "subdir": "jsonnet/kube-thanos"
+        }
+      },
+      "version": "release-2.2",
+      "name": "ocm-kube-thanos"
     }
   ],
   "legacyImports": true
