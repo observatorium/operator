@@ -49,30 +49,29 @@ function(params) {
   assert std.isBoolean(tc.config.serviceMonitor),
   assert std.isArray(tc.config.deduplicationReplicaLabels),
 
-  service:
-    {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: tc.config.name,
-        namespace: tc.config.namespace,
-        labels: tc.config.commonLabels,
-      },
-      spec: {
-        selector: tc.config.podLabelSelector,
-        ports: [
-          {
-            assert std.isString(name),
-            assert std.isNumber(tc.config.ports[name]),
-
-            name: name,
-            port: tc.config.ports[name],
-            targetPort: tc.config.ports[name],
-          }
-          for name in std.objectFields(tc.config.ports)
-        ],
-      },
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: tc.config.name,
+      namespace: tc.config.namespace,
+      labels: tc.config.commonLabels,
     },
+    spec: {
+      selector: tc.config.podLabelSelector,
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(tc.config.ports[name]),
+
+          name: name,
+          port: tc.config.ports[name],
+          targetPort: tc.config.ports[name],
+        }
+        for name in std.objectFields(tc.config.ports)
+      ],
+    },
+  },
 
   statefulSet:
     local c = {

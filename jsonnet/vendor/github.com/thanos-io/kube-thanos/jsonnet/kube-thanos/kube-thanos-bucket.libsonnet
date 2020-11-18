@@ -38,30 +38,29 @@ function(params) {
   assert std.isNumber(tb.config.replicas) && tb.config.replicas >= 0 : 'thanos bucket replicas has to be number >= 0',
   assert std.isObject(tb.config.resources),
 
-  service:
-    {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: tb.config.name,
-        namespace: tb.config.namespace,
-        labels: tb.config.commonLabels,
-      },
-      spec: {
-        ports: [
-          {
-            assert std.isString(name),
-            assert std.isNumber(tb.config.ports[name]),
-
-            name: name,
-            port: tb.config.ports[name],
-            targetPort: tb.config.ports[name],
-          }
-          for name in std.objectFields(tb.config.ports)
-        ],
-        selector: tb.config.podLabelSelector,
-      },
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: tb.config.name,
+      namespace: tb.config.namespace,
+      labels: tb.config.commonLabels,
     },
+    spec: {
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(tb.config.ports[name]),
+
+          name: name,
+          port: tb.config.ports[name],
+          targetPort: tb.config.ports[name],
+        }
+        for name in std.objectFields(tb.config.ports)
+      ],
+      selector: tb.config.podLabelSelector,
+    },
+  },
 
   deployment:
     local container = {

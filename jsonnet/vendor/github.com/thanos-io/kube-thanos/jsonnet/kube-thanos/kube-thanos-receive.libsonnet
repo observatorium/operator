@@ -12,31 +12,30 @@ function(params) {
   assert std.isBoolean(tr.config.serviceMonitor),
   assert std.isObject(tr.config.volumeClaimTemplate),
 
-  service:
-    {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: tr.config.name,
-        namespace: tr.config.namespace,
-        labels: tr.config.commonLabels,
-      },
-      spec: {
-        clusterIP: 'None',
-        ports: [
-          {
-            assert std.isString(name),
-            assert std.isNumber(tr.config.ports[name]),
-
-            name: name,
-            port: tr.config.ports[name],
-            targetPort: tr.config.ports[name],
-          }
-          for name in std.objectFields(tr.config.ports)
-        ],
-        selector: tr.config.podLabelSelector,
-      },
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
     },
+    spec: {
+      clusterIP: 'None',
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(tr.config.ports[name]),
+
+          name: name,
+          port: tr.config.ports[name],
+          targetPort: tr.config.ports[name],
+        }
+        for name in std.objectFields(tr.config.ports)
+      ],
+      selector: tr.config.podLabelSelector,
+    },
+  },
 
   statefulSet:
     local localEndpointFlag = '--receive.local-endpoint=$(NAME).%s.$(NAMESPACE).svc.cluster.local:%d' % [
@@ -194,17 +193,16 @@ function(params) {
     },
   },
 
-  podDisruptionBudget:
-    {
-      apiVersion: 'policy/v1beta1',
-      kind: 'PodDisruptionBudget',
-      metadata: {
-        name: tr.config.name,
-        namespace: tr.config.namespace,
-      },
-      spec: {
-        maxUnavailable: tr.config.podDisruptionBudgetMaxUnavailable,
-        selector: { matchLabels: tr.config.podLabelSelector },
-      },
+  podDisruptionBudget: {
+    apiVersion: 'policy/v1beta1',
+    kind: 'PodDisruptionBudget',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
     },
+    spec: {
+      maxUnavailable: tr.config.podDisruptionBudgetMaxUnavailable,
+      selector: { matchLabels: tr.config.podLabelSelector },
+    },
+  },
 }

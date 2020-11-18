@@ -4,16 +4,6 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/kakkoyun/kube-thanos.git",
-          "subdir": "jsonnet/kube-thanos"
-        }
-      },
-      "version": "e047e43775480ffbe89985ff734c1313870031d7",
-      "sum": "zFXI+vF2rNeIXsOU0/X+aTv/YPa6ahH/ilzptdEg6Jg="
-    },
-    {
-      "source": {
-        "git": {
           "remote": "https://github.com/observatorium/observatorium.git",
           "subdir": "jsonnet/lib"
         }
@@ -43,6 +33,16 @@
       "version": "1a8a104bd7842d7235902af14c5a03252c3144ff",
       "sum": "0FKabnXd0rMeu8YpkkopEOknqBf5PLq/DIIDd0ve7cU=",
       "name": "up"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/thanos-io/kube-thanos.git",
+          "subdir": "jsonnet/kube-thanos"
+        }
+      },
+      "version": "217c7a0c1ead8a6b6c647aaa3498facd7c4a7646",
+      "sum": "M9hBGGmIdNknFjs8OUIPhfSbSwxWc2qGSi32qyFyA34="
     }
   ],
   "legacyImports": false

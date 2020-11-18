@@ -4,25 +4,20 @@ local store = import 'kube-thanos/kube-thanos-store.libsonnet';
 // These are the defaults for this components configuration.
 // When calling the function to generate the component's manifest,
 // you can pass an object structured like the default to overwrite default values.
-local defaults = {
+local defaults = storeConfigDefaults {
   local defaults = self,
   shards: 1,
-  storeConfig: storeConfigDefaults,
 };
 
 function(params)
-
   // Combine the defaults and the passed params to make the component's config.
   local config = defaults + params;
 
   // Safety checks for combined config of defaults and params
   assert std.isNumber(config.shards) && config.shards >= 0 : 'thanos store shards has to be number >= 0';
-  assert std.isObject(config.storeConfig);
 
-  {
-    config:: config,
-  } + {
-    ['shard' + i]: store(config.storeConfig {
+  { config:: config } + {
+    ['shard' + i]: store(config {
       name+: '-%d' % i,
       commonLabels+:: { 'store.observatorium.io/shard': 'shard-' + i },
     }) {

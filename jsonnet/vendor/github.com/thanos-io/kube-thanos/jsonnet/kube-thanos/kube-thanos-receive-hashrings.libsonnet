@@ -4,13 +4,12 @@ local receive = import 'kube-thanos/kube-thanos-receive.libsonnet';
 // These are the defaults for this components configuration.
 // When calling the function to generate the component's manifest,
 // you can pass an object structured like the default to overwrite default values.
-local defaults = {
+local defaults = receiveConfigDefaults {
   local defaults = self,
   hashrings: [{
     hashring: 'default',
     tenants: [],
   }],
-  receiveConfig: receiveConfigDefaults,
 };
 
 function(params)
@@ -18,13 +17,10 @@ function(params)
   local config = defaults + params;
 
   // Safety checks for combined config of defaults and params
-  assert std.isArray(config.hashrings) : 'thanos receive replicas has to be an array';
-  assert std.isObject(config.receiveConfig);
+  assert std.isArray(config.hashrings) : 'thanos receive hashrings has to be an array';
 
-  {
-    config:: config,
-  } + {
-    [h.hashring]: receive(config.receiveConfig {
+  { config:: config } + {
+    [h.hashring]: receive(config {
       name+: '-' + h.hashring,
       commonLabels+:: {
         'controller.receive.thanos.io/hashring': h.hashring,

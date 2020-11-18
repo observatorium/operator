@@ -4,11 +4,11 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/kakkoyun/deployments.git",
+          "remote": "https://github.com/observatorium/deployments.git",
           "subdir": ""
         }
       },
-      "version": "upgrade_kube_thanos_helpers"
+      "version": "master"
     }
   ],
   "legacyImports": true

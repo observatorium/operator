@@ -50,31 +50,30 @@ function(params) {
   assert std.isBoolean(tr.config.serviceMonitor),
   assert std.isObject(tr.config.volumeClaimTemplate),
 
-  service:
-    {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: tr.config.name,
-        namespace: tr.config.namespace,
-        labels: tr.config.commonLabels,
-      },
-      spec: {
-        ports: [
-          {
-            assert std.isString(name),
-            assert std.isNumber(tr.config.ports[name]),
-
-            name: name,
-            port: tr.config.ports[name],
-            targetPort: tr.config.ports[name],
-          }
-          for name in std.objectFields(tr.config.ports)
-        ],
-        clusterIP: 'None',
-        selector: tr.config.podLabelSelector,
-      },
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
     },
+    spec: {
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(tr.config.ports[name]),
+
+          name: name,
+          port: tr.config.ports[name],
+          targetPort: tr.config.ports[name],
+        }
+        for name in std.objectFields(tr.config.ports)
+      ],
+      clusterIP: 'None',
+      selector: tr.config.podLabelSelector,
+    },
+  },
 
   statefulSet:
     local c = {

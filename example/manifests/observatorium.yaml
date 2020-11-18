@@ -1,1 +1,137 @@
-null
+apiVersion: core.observatorium.io/v1alpha1
+kind: Observatorium
+metadata:
+  labels:
+    app.kubernetes.io/instance: observatorium-xyz
+    app.kubernetes.io/name: observatorium-cr
+    app.kubernetes.io/part-of: observatorium
+  name: observatorium-xyz
+spec:
+  api:
+    image: quay.io/observatorium/observatorium:master-2020-11-02-v0.1.1-192-ge324057
+    rbac:
+      roleBindings:
+      - name: test
+        roles:
+        - read-write
+        subjects:
+        - kind: user
+          name: admin@example.com
+      roles:
+      - name: read-write
+        permissions:
+        - read
+        - write
+        resources:
+        - logs
+        - metrics
+        tenants:
+        - test
+    replicas: 1
+    tenants:
+    - id: 1610b0c3-c509-4592-a256-a1871353dbfa
+      name: test
+      oidc:
+        clientID: test
+        clientSecret: ZXhhbXBsZS1hcHAtc2VjcmV0
+        issuerURL: http://dex.dex.svc.cluster.local:5556/dex
+        usernameClaim: email
+    tls:
+      caKey: ca.pem
+      certKey: cert.pem
+      configMapName: observatorium-xyz-tls
+      keyKey: key.pem
+      secretName: observatorium-xyz-tls
+      serverName: observatorium-xyz-observatorium-api.observatorium.svc.cluster.local
+    version: master-2020-11-02-v0.1.1-192-ge324057
+  apiQuery:
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    version: master-2020-11-04-a4576d85
+  compact:
+    enableDownsampling: false
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    replicas: 1
+    retentionResolution1h: 1s
+    retentionResolution5m: 1s
+    retentionResolutionRaw: 14d
+    version: master-2020-11-04-a4576d85
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  hashrings:
+  - hashring: default
+    tenants: []
+  loki:
+    image: docker.io/grafana/loki:2.0.0
+    replicas:
+      compactor: 1
+      distributor: 1
+      ingester: 1
+      querier: 1
+      query_frontend: 1
+    version: 2.0.0
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 250Mi
+  objectStorageConfig:
+    key: thanos.yaml
+    name: thanos-objectstorage
+  query:
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    replicas: 1
+    version: master-2020-11-04-a4576d85
+  queryFrontend:
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    replicas: 1
+    version: master-2020-11-04-a4576d85
+  receivers:
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    replicas: 1
+    version: master-2020-11-04-a4576d85
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  rule:
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    replicas: 1
+    version: master-2020-11-04-a4576d85
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  store:
+    cache:
+      exporterImage: prom/memcached-exporter:v0.6.0
+      exporterVersion: v0.6.0
+      image: docker.io/memcached:1.6.3-alpine
+      memoryLimitMb: 1024
+      replicas: 1
+      version: 1.6.3-alpine
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    shards: 1
+    version: master-2020-11-04-a4576d85
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  thanosReceiveController:
+    image: quay.io/observatorium/thanos-receive-controller:master-2020-02-06-b66e0c8
+    version: master-2020-02-06-b66e0c8

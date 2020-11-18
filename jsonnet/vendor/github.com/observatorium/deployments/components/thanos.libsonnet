@@ -1,8 +1,6 @@
 local t = (import 'kube-thanos/thanos.libsonnet');
 local rc = (import 'thanos-receive-controller/thanos-receive-controller.libsonnet');
 local memcached = (import 'memcached.libsonnet');
-local hashrings = (import 'kube-thanos/kube-thanos-receive-hashrings.libsonnet');
-local shards = (import 'kube-thanos/kube-thanos-store-shards.libsonnet');
 
 // These are the defaults for this components configuration.
 // When calling the function to generate the component's manifest,
@@ -105,32 +103,30 @@ function(params) {
     },
   },
 
-  receivers:: hashrings({
+  receivers:: t.receiveHashrings({
     hashrings: thanos.config.hashrings,
-    receiveConfig: {
-      name: thanos.config.name + '-thanos-receive',
-      namespace: thanos.config.namespace,
-      commonLabels+:: thanos.config.commonLabels,
-      image: thanos.config.image,
-      version: thanos.config.version,
-      replicas: 1,
-      replicaLabels: thanos.config.replicaLabels,
-      replicationFactor: 1,
-      retention: '4d',
-      objectStorageConfig: thanos.config.objectStorageConfig,
-      volumeClaimTemplate: {
-        spec: {
-          accessModes: ['ReadWriteOnce'],
-          resources: {
-            requests: {
-              storage: '50Gi',
-            },
+    name: thanos.config.name + '-thanos-receive',
+    namespace: thanos.config.namespace,
+    commonLabels+:: thanos.config.commonLabels,
+    image: thanos.config.image,
+    version: thanos.config.version,
+    replicas: 1,
+    replicaLabels: thanos.config.replicaLabels,
+    replicationFactor: 1,
+    retention: '4d',
+    objectStorageConfig: thanos.config.objectStorageConfig,
+    volumeClaimTemplate: {
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        resources: {
+          requests: {
+            storage: '50Gi',
           },
         },
       },
-      hashringConfigMapName: '%s-generated' % thanos.receiveController.configmap.metadata.name,
-      logLevel: 'info',
     },
+    hashringConfigMapName: '%s-generated' % thanos.receiveController.configmap.metadata.name,
+    logLevel: 'info',
   }),
 
   rule:: t.rule({
@@ -154,47 +150,45 @@ function(params) {
     },
   }),
 
-  stores:: shards({
+  stores:: t.storeShards({
     shards: thanos.config.stores.shards,
-    storeConfig: {
-      name: thanos.config.name + '-thanos-store-shard',
-      namespace: thanos.config.namespace,
-      commonLabels+:: thanos.config.commonLabels,
-      image: thanos.config.image,
-      version: thanos.config.version,
-      objectStorageConfig: thanos.config.objectStorageConfig,
-      replicas: 1,
-      ignoreDeletionMarksDelay: '24h',
-      volumeClaimTemplate: {
-        spec: {
-          accessModes: ['ReadWriteOnce'],
-          resources: {
-            requests: {
-              storage: '50Gi',
-            },
+    name: thanos.config.name + '-thanos-store-shard',
+    namespace: thanos.config.namespace,
+    commonLabels+:: thanos.config.commonLabels,
+    image: thanos.config.image,
+    version: thanos.config.version,
+    objectStorageConfig: thanos.config.objectStorageConfig,
+    replicas: 1,
+    ignoreDeletionMarksDelay: '24h',
+    volumeClaimTemplate: {
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        resources: {
+          requests: {
+            storage: '50Gi',
           },
         },
       },
-      logLevel: 'info',
-      local memcachedDefaults = {
-        timeout: '2s',
-        max_idle_connections: 1000,
-        max_async_concurrency: 100,
-        max_async_buffer_size: 100000,
-        max_get_multi_concurrency: 900,
-        max_get_multi_batch_size: 1000,
+    },
+    logLevel: 'info',
+    local memcachedDefaults = {
+      timeout: '2s',
+      max_idle_connections: 1000,
+      max_async_concurrency: 100,
+      max_async_buffer_size: 100000,
+      max_get_multi_concurrency: 900,
+      max_get_multi_batch_size: 1000,
+    },
+    indexCache: {
+      type: 'memcached',
+      config+: memcachedDefaults {
+        addresses: ['dnssrv+_client._tcp.%s.%s.svc' % [thanos.storeCache.service.metadata.name, thanos.storeCache.service.metadata.namespace]],
       },
-      indexCache: {
-        type: 'memcached',
-        config+: memcachedDefaults {
-          addresses: ['dnssrv+_client._tcp.%s.%s.svc' % [thanos.storeCache.service.metadata.name, thanos.storeCache.service.metadata.namespace]],
-        },
-      },
-      bucketCache: {
-        type: 'memcached',
-        config+: memcachedDefaults {
-          addresses: ['dnssrv+_client._tcp.%s.%s.svc' % [thanos.storeCache.service.metadata.name, thanos.storeCache.service.metadata.namespace]],
-        },
+    },
+    bucketCache: {
+      type: 'memcached',
+      config+: memcachedDefaults {
+        addresses: ['dnssrv+_client._tcp.%s.%s.svc' % [thanos.storeCache.service.metadata.name, thanos.storeCache.service.metadata.namespace]],
       },
     },
   }),

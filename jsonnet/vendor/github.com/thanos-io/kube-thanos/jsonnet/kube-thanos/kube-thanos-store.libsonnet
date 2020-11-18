@@ -22,31 +22,30 @@ function(params) {
   assert std.isBoolean(ts.config.serviceMonitor),
   assert std.isObject(ts.config.volumeClaimTemplate),
 
-  service:
-    {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: ts.config.name,
-        namespace: ts.config.namespace,
-        labels: ts.config.commonLabels,
-      },
-      spec: {
-        clusterIP: 'None',
-        selector: ts.config.podLabelSelector,
-        ports: [
-          {
-            assert std.isString(name),
-            assert std.isNumber(ts.config.ports[name]),
-
-            name: name,
-            port: ts.config.ports[name],
-            targetPort: ts.config.ports[name],
-          }
-          for name in std.objectFields(ts.config.ports)
-        ],
-      },
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: ts.config.name,
+      namespace: ts.config.namespace,
+      labels: ts.config.commonLabels,
     },
+    spec: {
+      clusterIP: 'None',
+      selector: ts.config.podLabelSelector,
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(ts.config.ports[name]),
+
+          name: name,
+          port: ts.config.ports[name],
+          targetPort: ts.config.ports[name],
+        }
+        for name in std.objectFields(ts.config.ports)
+      ],
+    },
+  },
 
   statefulSet:
     local c = {
