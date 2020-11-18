@@ -8,7 +8,7 @@ metadata:
   name: observatorium-xyz
 spec:
   api:
-    image: quay.io/observatorium/observatorium:master-2020-09-08-v0.1.1-142-g61a908f
+    image: quay.io/observatorium/observatorium:master-2020-11-02-v0.1.1-192-ge324057
     rbac:
       roleBindings:
       - name: test
@@ -43,18 +43,18 @@ spec:
       keyKey: key.pem
       secretName: observatorium-xyz-tls
       serverName: observatorium-xyz-observatorium-api.observatorium.svc.cluster.local
-    version: master-2020-09-08-v0.1.1-142-g61a908f
+    version: master-2020-11-02-v0.1.1-192-ge324057
   apiQuery:
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
-    version: master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    version: master-2020-11-04-a4576d85
   compact:
     enableDownsampling: false
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1
     retentionResolution1h: 1s
     retentionResolution5m: 1s
     retentionResolutionRaw: 14d
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -66,14 +66,14 @@ spec:
   - hashring: default
     tenants: []
   loki:
-    image: docker.io/grafana/loki:1.6.1
+    image: docker.io/grafana/loki:2.0.0
     replicas:
+      compactor: 1
       distributor: 1
       ingester: 1
       querier: 1
       query_frontend: 1
-      table_manager: 1
-    version: 1.6.1
+    version: 2.0.0
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -82,28 +82,20 @@ spec:
           requests:
             storage: 250Mi
   objectStorageConfig:
-    loki:
-      accessKeyIdKey: aws_access_key_id
-      bucketsKey: buckets
-      endpointKey: endpoint
-      regionKey: region
-      secretAccessKeyKey: aws_secret_access_key
-      secretName: loki-objectstorage
-    thanos:
-      key: thanos.yaml
-      name: thanos-objectstorage
+    key: thanos.yaml
+    name: thanos-objectstorage
   query:
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
   queryFrontend:
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
   receivers:
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -112,9 +104,9 @@ spec:
           requests:
             storage: 50Gi
   rule:
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -130,9 +122,9 @@ spec:
       memoryLimitMb: 1024
       replicas: 1
       version: 1.6.3-alpine
-    image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     shards: 1
-    version: master-2020-08-12-70f89d83
+    version: master-2020-11-04-a4576d85
     volumeClaimTemplate:
       spec:
         accessModes:

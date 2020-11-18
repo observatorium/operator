@@ -1,167 +1,190 @@
-local k = import 'ksonnet/ksonnet.beta.4/k.libsonnet';
+// These are the defaults for this components configuration.
+// When calling the function to generate the component's manifest,
+// you can pass an object structured like the default to overwrite default values.
+local defaults = {
+  local defaults = self,
+  name: error 'must provide name',
+  namespace: error 'must provide namespace',
+  version: error 'must provide version',
+  image: error 'must provide image',
+  replicas: error 'must provide replicas',
+  hashrings: error 'must provide hashring configuration',
+  resources: {},
+  serviceMonitor: false,
+  ports: { http: 8080 },
 
-{
+  commonLabels:: {
+    'app.kubernetes.io/name': 'thanos-receive-controller',
+    'app.kubernetes.io/instance': defaults.name,
+    'app.kubernetes.io/version': defaults.version,
+    'app.kubernetes.io/component': 'kubernetes-controller',
+  },
+
+  podLabelSelector:: {
+    [labelName]: defaults.commonLabels[labelName]
+    for labelName in std.objectFields(defaults.commonLabels)
+    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+  },
+};
+
+function(params) {
   local trc = self,
 
-  config:: {
-    name: error 'must provide name',
-    namespace: error 'must provide namespace',
-    version: error 'must provide version',
-    image: error 'must provide image',
-    replicas: error 'must provide replicas',
-    hashrings: error 'must provide hashring configuration',
+  // Combine the defaults and the passed params to make the component's config.
+  config:: defaults + params,
+  // Safety checks for combined config of defaults and params
+  assert std.isNumber(trc.config.replicas) && trc.config.replicas >= 0 : 'thanos receive controller replicas has to be number >= 0',
+  assert std.isObject(trc.config.resources),
+  assert std.isBoolean(trc.config.serviceMonitor),
+  assert std.isArray(trc.config.hashrings),
 
-    commonLabels:: {
-      'app.kubernetes.io/name': 'thanos-receive-controller',
-      'app.kubernetes.io/instance': trc.config.name,
-      'app.kubernetes.io/version': trc.config.version,
-      'app.kubernetes.io/component': 'kubernetes-controller',
-    },
-
-    podLabelSelector:: {
-      [labelName]: trc.config.commonLabels[labelName]
-      for labelName in std.objectFields(trc.config.commonLabels)
-      if !std.setMember(labelName, ['app.kubernetes.io/version'])
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: trc.config.name,
+      namespace: trc.config.namespace,
+      labels: trc.config.commonLabels,
     },
   },
-  serviceAccount:
-    local sa = k.core.v1.serviceAccount;
 
-    sa.new() +
-    sa.mixin.metadata.withName(trc.config.name) +
-    sa.mixin.metadata.withNamespace(trc.config.namespace) +
-    sa.mixin.metadata.withLabels(trc.config.commonLabels),
+  role: {
+    apiVersion: 'rbac.authorization.k8s.io/v1',
+    kind: 'Role',
+    metadata: {
+      name: trc.config.name,
+      namespace: trc.config.namespace,
+      labels: trc.config.commonLabels,
+    },
 
-  role:
-    local role = k.rbac.v1.role;
-    local rules = role.rulesType;
+    rules: [
+      {
+        apiGroups: [''],
+        resources: ['configmaps'],
+        verbs: ['list', 'watch', 'get', 'create', 'update'],
+      },
+      {
+        apiGroups: ['apps'],
+        resources: ['statefulsets'],
+        verbs: ['list', 'watch', 'get'],
+      },
+    ],
+  },
 
-    role.new() +
-    role.mixin.metadata.withName(trc.config.name) +
-    role.mixin.metadata.withNamespace(trc.config.namespace) +
-    role.mixin.metadata.withLabels(trc.config.commonLabels) +
-    role.withRules([
-      rules.new() +
-      rules.withApiGroups(['']) +
-      rules.withResources([
-        'configmaps',
-      ]) +
-      rules.withVerbs(['list', 'watch', 'get', 'create', 'update']),
-      rules.new() +
-      rules.withApiGroups(['apps']) +
-      rules.withResources([
-        'statefulsets',
-      ]) +
-      rules.withVerbs(['list', 'watch', 'get']),
-    ]),
+  roleBinding: {
+    apiVersion: 'rbac.authorization.k8s.io/v1',
+    kind: 'RoleBinding',
+    metadata: {
+      name: trc.config.name,
+      namespace: trc.config.namespace,
+      labels: trc.config.commonLabels,
+    },
 
-  roleBinding:
-    local rb = k.rbac.v1.roleBinding;
-
-    rb.new() +
-    rb.mixin.metadata.withName(trc.config.name) +
-    rb.mixin.metadata.withNamespace(trc.config.namespace) +
-    rb.mixin.metadata.withLabels(trc.config.commonLabels) +
-    rb.mixin.roleRef.withApiGroup('rbac.authorization.k8s.io') +
-    rb.mixin.roleRef.withName(trc.role.metadata.name) +
-    rb.mixin.roleRef.mixinInstance({ kind: 'Role' }) +
-    rb.withSubjects([{
+    roleRef: {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'Role',
+      name: trc.role.metadata.name,
+    },
+    subjects: [{
       kind: 'ServiceAccount',
       name: trc.serviceAccount.metadata.name,
       namespace: trc.serviceAccount.metadata.namespace,
-    }]),
+    }],
+  },
 
-  configmap:
-    local configmap = k.core.v1.configMap;
+  configmap: {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name: trc.config.name + '-tenants',
+      namespace: trc.config.namespace,
+      labels: trc.config.commonLabels,
+    },
+    data: { 'hashrings.json': std.manifestJsonEx(trc.config.hashrings, '  ') },
+  },
 
-    configmap.new() +
-    configmap.mixin.metadata.withName(trc.config.name + '-tenants') +
-    configmap.mixin.metadata.withNamespace(trc.config.namespace) +
-    configmap.mixin.metadata.withLabels(trc.config.commonLabels) +
-    configmap.withData({
-      'hashrings.json': std.manifestJsonEx(trc.config.hashrings, '  '),
-    }),
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: trc.config.name,
+      namespace: trc.config.namespace,
+      labels: trc.config.commonLabels,
+    },
+    spec: {
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(trc.config.ports[name]),
 
-  service:
-    local service = k.core.v1.service;
-    local ports = service.mixin.spec.portsType;
-
-    service.new(
-      trc.config.name,
-      trc.config.podLabelSelector,
-      [
-        ports.newNamed('http', 8080, 8080),
+          name: name,
+          port: trc.config.ports[name],
+          targetPort: trc.config.ports[name],
+        }
+        for name in std.objectFields(trc.config.ports)
       ],
-    ) +
-    service.mixin.metadata.withNamespace(trc.config.namespace) +
-    service.mixin.metadata.withLabels(trc.config.commonLabels),
+      selector: trc.config.podLabelSelector,
+    },
+  },
 
   deployment:
-    local deployment = k.apps.v1.deployment;
-    local container = deployment.mixin.spec.template.spec.containersType;
-    local containerPort = container.portsType;
-    local env = container.envType;
-
-    local c =
-      container.new('thanos-receive-controller', trc.config.image) +
-      container.withArgs([
+    local c = {
+      name: 'thanos-receive-controller',
+      image: trc.config.image,
+      args: [
         '--configmap-name=%s' % trc.configmap.metadata.name,
         '--configmap-generated-name=%s-generated' % trc.configmap.metadata.name,
         '--file-name=hashrings.json',
         '--namespace=$(NAMESPACE)',
-      ]) +
-      container.withEnv([
-        env.fromFieldPath('NAMESPACE', 'metadata.namespace'),
-      ]) +
-      container.withPorts(
-        containerPort.newNamed(8080, 'http')
-      );
+      ],
+      env: [
+        { name: 'NAMESPACE', valueFrom: { fieldRef: { fieldPath: 'metadata.namespace' } } },
+      ],
+      ports: [
+        { name: port.name, containerPort: port.port }
+        for port in trc.service.spec.ports
+      ],
+      resources: if trc.config.resources != {} then trc.config.resources else {},
+    };
 
-    deployment.new(trc.config.name, 1, c, trc.config.commonLabels) +
-    deployment.mixin.metadata.withNamespace(trc.config.namespace) +
-    deployment.mixin.metadata.withLabels(trc.config.commonLabels) +
-    deployment.mixin.spec.template.spec.withServiceAccount(trc.serviceAccount.metadata.name) +
-    deployment.mixin.spec.selector.withMatchLabels(trc.config.podLabelSelector),
-
-  withServiceMonitor:: {
-    local trc = self,
-    serviceMonitor: {
-      apiVersion: 'monitoring.coreos.com/v1',
-      kind: 'ServiceMonitor',
-      metadata+: {
+    {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
         name: trc.config.name,
         namespace: trc.config.namespace,
+        labels: trc.config.commonLabels,
       },
       spec: {
-        selector: {
-          matchLabels: trc.config.commonLabels,
-        },
-        endpoints: [
-          { port: 'http' },
-        ],
-      },
-    },
-  },
-
-  withResources:: {
-    local trc = self,
-    config+:: {
-      resources: error 'must provide resources',
-    },
-
-    deployment+: {
-      spec+: {
-        template+: {
-          spec+: {
-            containers: [
-              if c.name == 'thanos-receive-controller' then c {
-                resources: trc.config.resources,
-              } else c
-              for c in super.containers
-            ],
+        replicas: trc.config.replicas,
+        selector: { matchLabels: trc.config.podLabelSelector },
+        template: {
+          metadata: {
+            labels: trc.config.commonLabels,
+          },
+          spec: {
+            containers: [c],
+            serviceAccount: trc.serviceAccount.metadata.name,
           },
         },
       },
+    },
+
+
+  serviceMonitor: if trc.config.serviceMonitor == true then {
+    apiVersion: 'monitoring.coreos.com/v1',
+    kind: 'ServiceMonitor',
+    metadata+: {
+      name: trc.config.name,
+      namespace: trc.config.namespace,
+    },
+    spec: {
+      selector: {
+        matchLabels: trc.config.commonLabels,
+      },
+      endpoints: [
+        { port: 'http' },
+      ],
     },
   },
 }

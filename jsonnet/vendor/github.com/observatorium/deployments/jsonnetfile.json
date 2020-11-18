@@ -4,48 +4,22 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/grafana/grafonnet-lib",
-          "subdir": "grafonnet"
-        }
-      },
-      "version": "master"
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/grafana/jsonnet-libs",
-          "subdir": "grafana-builder"
-        }
-      },
-      "version": "master"
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/jaegertracing/jaeger",
-          "subdir": "monitoring/jaeger-mixin"
-        }
-      },
-      "version": "master"
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/metalmatze/slo-libsonnet",
-          "subdir": "slo-libsonnet"
-        }
-      },
-      "version": "all"
-    },
-    {
-      "source": {
-        "git": {
           "remote": "https://github.com/observatorium/observatorium",
           "subdir": "jsonnet/lib"
         }
       },
       "version": "master",
       "name": "observatorium"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/observatorium/up",
+          "subdir": "jsonnet"
+        }
+      },
+      "version": "master",
+      "name": "up"
     },
     {
       "source": {
@@ -60,26 +34,8 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/observatorium/thanos-receive-controller",
-          "subdir": "jsonnet/thanos-receive-controller-mixin"
-        }
-      },
-      "version": "master"
-    },
-    {
-      "source": {
-        "git": {
           "remote": "https://github.com/thanos-io/kube-thanos",
           "subdir": "jsonnet/kube-thanos"
-        }
-      },
-      "version": "master"
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/thanos-io/thanos",
-          "subdir": "mixin"
         }
       },
       "version": "master"
