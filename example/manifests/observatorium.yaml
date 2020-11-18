@@ -82,8 +82,16 @@ spec:
           requests:
             storage: 250Mi
   objectStorageConfig:
-    key: thanos.yaml
-    name: thanos-objectstorage
+    loki:
+      accessKeyIdKey: aws_access_key_id
+      bucketsKey: buckets
+      endpointKey: endpoint
+      regionKey: region
+      secretAccessKeyKey: aws_secret_access_key
+      secretName: loki-objectstorage
+    thanos:
+      key: thanos.yaml
+      name: thanos-objectstorage
   query:
     image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
     replicas: 1

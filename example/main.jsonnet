@@ -45,7 +45,10 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
     },
   },
   spec: {
-    objectStorageConfig: obs.thanos.config.objectStorageConfig,
+    objectStorageConfig: {
+      thanos: obs.thanos.config.objectStorageConfig,
+      loki: obs.loki.config.objectStorageConfig,
+    },
     hashrings: obs.thanos.config.hashrings,
 
     queryFrontend: {
