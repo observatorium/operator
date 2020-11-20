@@ -64,9 +64,9 @@ function(params) {
   // Combine the defaults and the passed params to make the component's config.
   config:: defaults + params + {
     queryRangeCache+:
-      if std.objectHas(params, 'queryRangeCache') && params.queryRangeCache.type == 'memcached' then
+      if std.objectHas(params, 'queryRangeCache') && std.objectHas(params.queryRangeCache, 'type') && params.queryRangeCache.type == 'memcached' then
         defaults.memcachedDefaults + params.queryRangeCache
-      else if std.objectHas(params, 'queryRangeCache') && params.queryRangeCache.type == 'in-memory' then
+      else if std.objectHas(params, 'queryRangeCache') && std.objectHas(params.queryRangeCache, 'type') && params.queryRangeCache.type == 'in-memory' then
         defaults.fifoCache + params.queryRangeCache
       else {},
     labelsCache+:

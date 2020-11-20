@@ -5,6 +5,7 @@ set -o pipefail
 
 ARTIFACT_DIR="${ARTIFACT_DIR:-/tmp/artifacts}"
 KUBECTL="${KUBECTL:-./kubectl}"
+KIND="${KIND:-./kind}"
 OS_TYPE=$(echo `uname -s` | tr '[:upper:]' '[:lower:]')
 
 kind() {
@@ -16,6 +17,7 @@ kind() {
 
 dex() {
     $KUBECTL create ns dex || true
+    $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/tests/manifests/observatorium-xyz-tls-dex.yaml
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-secret.yaml
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-pvc.yaml
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/deployments/environments/dev/manifests/dex-deployment.yaml
@@ -59,7 +61,7 @@ wait_for_cr() {
 
 deploy_operator() {
     docker build -t quay.io/observatorium/observatorium-operator:latest .
-    ./kind load docker-image quay.io/observatorium/observatorium-operator:latest
+    $KIND load docker-image quay.io/observatorium/observatorium-operator:latest
     $KUBECTL apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
     $KUBECTL apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0prometheusruleCustomResourceDefinition.yaml
     $KUBECTL create ns observatorium-minio || true
