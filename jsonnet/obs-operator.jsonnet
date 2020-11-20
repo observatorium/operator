@@ -65,12 +65,15 @@ local operatorObs = obs {
       image: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'image') then cr.spec.queryFrontend.image else obs.thanos.queryFrontend.config.image,
       version: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'version') then cr.spec.queryFrontend.version else obs.thanos.queryFrontend.config.version,
       replicas: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'replicas') then cr.spec.queryFrontend.replicas else obs.thanos.queryFrontend.config.replicas,
-      queryRangeCache:: {},
+      queryRangeCache: { },
+      labelsCache: { },
     }),
+
+    queryFrontendCache:: {},
   },
 
   config+:: {
-    loki+:: if std.objectHas(cr.spec, 'loki') then { // NOTICE: Will be removed after loki refactor.
+    loki+:: if std.objectHas(cr.spec, 'loki') then {  // NOTICE: Will be removed after loki refactor.
       image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
       replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
       version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
