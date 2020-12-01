@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "778100b38631852a86a29c641f3bda01585f7adb",
-      "sum": "P9S1Vj+JZ0ZsVBXF/EmtZ3joEmLqBxCWtOPtL2qCVYU="
+      "version": "bc24613708574e718c6a8363c58eeee3fb465273",
+      "sum": "Z4Gzt+LqzKpoa1gTzp5Sua6gVhXXZ3CzxVhjCrExdi4="
     },
     {
       "source": {
@@ -51,8 +51,8 @@
           "subdir": "jsonnet/kube-thanos"
         }
       },
-      "version": "39435d26b21bbbab6c423429e2f7275cc0a54ecd",
-      "sum": "gxvo3maoosfhInRxp4Ct1PmtH5JF09TCtitAGVJ3yKY="
+      "version": "d7696758dd8b90d8f6d02e7739a21ce34b48c8c1",
+      "sum": "cmvtINsnwAGR+ZFiz5cGg+9TRfQhnkGwiKQEqXmB5dQ="
     }
   ],
   "legacyImports": false

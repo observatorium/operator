@@ -7,11 +7,15 @@ function(params) {
   config:: defaults + params + {
     // If indexCache is given and of type memcached, merge defaults with params
     indexCache+:
-      if std.objectHas(params, 'indexCache') && params.indexCache.type == 'memcached' then
+      if std.objectHas(params, 'indexCache')
+         && std.objectHas(params.indexCache, 'type')
+         && params.indexCache.type == 'memcached' then
         defaults.memcachedDefaults + defaults.indexCacheDefaults + params.indexCache
       else {},
     bucketCache+:
-      if std.objectHas(params, 'bucketCache') && params.bucketCache.type == 'memcached' then
+      if std.objectHas(params, 'bucketCache')
+         && std.objectHas(params.bucketCache, 'type')
+         && params.bucketCache.type == 'memcached' then
         defaults.memcachedDefaults + defaults.bucketCacheMemcachedDefaults + params.bucketCache
       else {},
   },
@@ -54,6 +58,7 @@ function(params) {
       args: [
         'store',
         '--log.level=' + ts.config.logLevel,
+        '--log.format=' + ts.config.logFormat,
         '--data-dir=/var/thanos/store',
         '--grpc-address=0.0.0.0:%d' % ts.config.ports.grpc,
         '--http-address=0.0.0.0:%d' % ts.config.ports.http,
@@ -61,7 +66,6 @@ function(params) {
         '--ignore-deletion-marks-delay=' + ts.config.ignoreDeletionMarksDelay,
       ] + (
         if std.length(ts.config.indexCache) > 0 then [
-          '--experimental.enable-index-cache-postings-compression',
           '--index-cache.config=' + std.manifestYamlDoc(ts.config.indexCache),
         ] else []
       ) + (
