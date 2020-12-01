@@ -49,7 +49,7 @@ container-push: container-build
 	docker push $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION)
 	docker push $(DOCKER_REPO):latest
 
-vendor-jsonnet: $(JB)
+jsonnet-vendor: $(JB)
 	cd jsonnet; $(JB) install
 
 jsonnet-update: $(JB)
@@ -58,15 +58,16 @@ jsonnet-update: $(JB)
 jsonnet-update-deployments: $(JB)
 	cd jsonnet; $(JB) update github.com/observatorium/deployments
 
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
-
-$(CONTROLLER_GEN): $(BIN_DIR)
-	GO111MODULE="on" go build -o $@ sigs.k8s.io/controller-tools/cmd/controller-gen
-
 JSONNET_SRC = $(shell find . -type f -not -path './*vendor/*' \( -name '*.libsonnet' -o -name '*.jsonnet' \))
 JSONNETFMT_CMD := $(JSONNETFMT) -n 2 --max-blank-lines 2 --string-style s --comment-style s
 
 .PHONY: jsonnet-fmt
 jsonnet-fmt: | $(JSONNETFMT)
 	PATH=$$PATH:$(BIN_DIR):$(FIRST_GOPATH)/bin echo ${JSONNET_SRC} | xargs -n 1 -- $(JSONNETFMT_CMD) -i
+
+# Tools
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+$(CONTROLLER_GEN): $(BIN_DIR)
+	GO111MODULE="on" go build -o $@ sigs.k8s.io/controller-tools/cmd/controller-gen

@@ -5,7 +5,7 @@ jobs:
       - image: quay.io/coreos/jsonnet-ci
     steps:
       - checkout
-      - run: make vendor-jsonnet
+      - run: make jsonnet-vendor
       - run: make generate manifests
       - run: git diff --exit-code
 
@@ -28,7 +28,7 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: make vendor-jsonnet
+      - run: make jsonnet-vendor
       - run: |
           echo "$DOCKER_PASS" | docker login quay.io --username $DOCKER_USER --password-stdin
           make container-push
