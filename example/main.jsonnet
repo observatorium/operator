@@ -11,6 +11,7 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
         id: 'test',
         name: 'test',
         secret: 'ZXhhbXBsZS1hcHAtc2VjcmV0',
+        issuerCAPath: '/var/run/tls/test/service-ca.crt',
       },
     ],
     enablePasswordDB: true,
@@ -134,12 +135,15 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
         oidc: {
           clientID: dex.config.config.staticClients[0].id,
           clientSecret: dex.config.config.staticClients[0].secret,
-          issuerURL: 'http://%s.%s.svc.cluster.local:%d/dex' % [
+          issuerURL: 'https://%s.%s.svc.cluster.local:%d/dex' % [
             dex.service.metadata.name,
             dex.service.metadata.namespace,
             dex.service.spec.ports[0].port,
           ],
+          issuerCAPath: dex.config.config.staticClients[0].issuerCAPath,
           usernameClaim: 'email',
+          configMapName: '%s-ca-tls' % [dex.config.config.staticClients[0].id],
+          caKey: 'service-ca.crt',
         },
       }],
       tls: {

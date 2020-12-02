@@ -6,6 +6,7 @@ WORKDIR /workspace
 # Copy the jsonnet source
 COPY . operator/
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/components/ components/
+# TODO(kakkoyun): Remove after the file removed from upstream.
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/environments/base/default-config.libsonnet operator/jsonnet/
 # Build
 RUN GO111MODULE="on" go build github.com/brancz/locutus
