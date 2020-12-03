@@ -87,6 +87,7 @@ local operatorObs = obs {
 
   gubernator:: {},
 
+  // TODO(kakkoyun): This should be removed.
   apiQuery:: api(obs.api.config {
     image: if std.objectHas(cr.spec, 'apiQuery') && std.objectHas(cr.spec.apiQuery, 'image') then cr.spec.apiQuery.image else obs.api.config.image,
     version: if std.objectHas(cr.spec, 'apiQuery') && std.objectHas(cr.spec.apiQuery, 'version') then cr.spec.apiQuery.version else obs.api.config.version,

@@ -45,19 +45,18 @@ spec:
       configMapName: observatorium-xyz-tls
       keyKey: key.pem
       secretName: observatorium-xyz-tls
-      serverName: observatorium-xyz-observatorium-api.observatorium.svc.cluster.local
     version: master-2020-11-02-v0.1.1-192-ge324057
   apiQuery:
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
-    version: master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
+    version: v0.17.1
   compact:
     enableDownsampling: false
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     replicas: 1
     retentionResolution1h: 1s
     retentionResolution5m: 1s
     retentionResolutionRaw: 14d
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -96,17 +95,17 @@ spec:
       key: thanos.yaml
       name: thanos-objectstorage
   query:
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     replicas: 1
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
   queryFrontend:
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     replicas: 1
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
   receivers:
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     replicas: 1
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -115,9 +114,9 @@ spec:
           requests:
             storage: 50Gi
   rule:
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     replicas: 1
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -133,9 +132,9 @@ spec:
       memoryLimitMb: 1024
       replicas: 1
       version: 1.6.3-alpine
-    image: quay.io/thanos/thanos:master-2020-11-04-a4576d85
+    image: quay.io/thanos/thanos:v0.17.1
     shards: 1
-    version: master-2020-11-04-a4576d85
+    version: v0.17.1
     volumeClaimTemplate:
       spec:
         accessModes:

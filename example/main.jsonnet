@@ -152,12 +152,9 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
         keyKey: 'key.pem',
         configMapName: obs.config.name + '-tls',
         caKey: 'ca.pem',
-        serverName: '%s.%s.svc.cluster.local' % [
-          obs.api.service.metadata.name,
-          obs.api.service.metadata.namespace,
-        ],
       },
     },
+    // TODO(kakkoyun): This should be removed.
     apiQuery: {
       image: obs.thanos.config.image,
       version: obs.thanos.config.version,
