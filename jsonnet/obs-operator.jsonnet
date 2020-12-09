@@ -4,11 +4,11 @@ local memcached = import 'github.com/observatorium/deployments/components/memcac
 local api = import 'github.com/observatorium/observatorium/jsonnet/lib/observatorium-api.libsonnet';
 local receiveController = import 'github.com/observatorium/thanos-receive-controller/jsonnet/lib/thanos-receive-controller.libsonnet';
 local thanos = import 'github.com/thanos-io/kube-thanos/jsonnet/kube-thanos/thanos.libsonnet';
-local obs = (import 'github.com/observatorium/deployments/environments/base/observatorium.jsonnet');
+local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
 
 local operatorObs = obs {
   thanos+:: {
-    compact+:: thanos.compact(obs.thanos.compact.config {
+    compact:: thanos.compact(obs.thanos.compact.config {
       image: if std.objectHas(cr.spec.compact, 'image') then cr.spec.compact.image else obs.thanos.compact.config.image,
       version: if std.objectHas(cr.spec.compact, 'version') then cr.spec.compact.version else obs.thanos.compact.config.version,
       replicas: if std.objectHas(cr.spec.compact, 'replicas') then cr.spec.compact.replicas else obs.thanos.compact.config.replicas,
@@ -72,18 +72,12 @@ local operatorObs = obs {
     queryFrontendCache:: {},
   },
 
-  config+:: {
-    loki+:: if std.objectHas(cr.spec, 'loki') then {  // NOTICE: Will be removed after loki refactor.
+  loki:: if std.objectHas(cr.spec, 'loki') then loki(obs.loki.config {
       image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
       replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
       version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
       objectStorageConfig: if cr.spec.objectStorageConfig.loki != null then cr.spec.objectStorageConfig.loki else obs.loki.config.objectStorageConfig,
-    } else {},
-  },
-
-  loki+:: loki.withVolumeClaimTemplate {  // NOTICE: Will be removed after loki refactor.
-    config+:: if std.objectHas(cr.spec, 'loki') then obs.loki.config else {},
-  },
+    }) else {},
 
   gubernator:: {},
 

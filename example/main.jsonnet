@@ -32,8 +32,7 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
   },
 });
 
-local obs = (import 'github.com/observatorium/deployments/environments/base/observatorium.jsonnet');
-
+local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
 {
   local cr = self,
   name:: 'observatorium-cr',
@@ -165,10 +164,10 @@ local obs = (import 'github.com/observatorium/deployments/environments/base/obse
       replicas: obs.thanos.query.config.replicas,
     },
     loki: {
-      image: obs.config.loki.image,
-      replicas: obs.config.loki.replicas,
-      version: obs.config.loki.version,
-      volumeClaimTemplate: obs.config.loki.volumeClaimTemplate,
+      image: obs.loki.config.image,
+      replicas: obs.loki.config.replicas,
+      version: obs.loki.config.version,
+      volumeClaimTemplate: obs.loki.config.volumeClaimTemplate,
     },
   },
 }
