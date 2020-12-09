@@ -1,3 +1,5 @@
+local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
+
 local dex = (import 'github.com/observatorium/deployments/components/dex.libsonnet')({
   local cfg = self,
   name: 'dex',
@@ -32,7 +34,6 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
   },
 });
 
-local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
 {
   local cr = self,
   name:: 'observatorium-cr',
