@@ -1,66 +1,92 @@
-local k = import 'ksonnet/ksonnet.beta.4/k.libsonnet';
+// These are the defaults for this components configuration.
+// When calling the function to generate the component's manifest,
+// you can pass an object structured like the default to overwrite default values.
+local defaults = {
+  local defaults = self,
+  name: 'thanos-rule',
+  namespace: error 'must provide namespace',
+  version: error 'must provide version',
+  image: error 'must provide image',
+  replicas: error 'must provide replicas',
+  objectStorageConfig: error 'must provide objectStorageConfig',
+  ruleFiles: [],
+  rulesConfig: [],
+  alertmanagersURLs: [],
+  queriers: [],
+  logLevel: 'info',
+  logFormat: 'logfmt',
+  resources: {},
+  serviceMonitor: false,
+  ports: {
+    grpc: 10901,
+    http: 10902,
+  },
+  tracing: {},
 
-{
+  commonLabels:: {
+    'app.kubernetes.io/name': 'thanos-rule',
+    'app.kubernetes.io/instance': defaults.name,
+    'app.kubernetes.io/version': defaults.version,
+    'app.kubernetes.io/component': 'rule-evaluation-engine',
+  },
+
+  podLabelSelector:: {
+    [labelName]: defaults.commonLabels[labelName]
+    for labelName in std.objectFields(defaults.commonLabels)
+    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+  },
+};
+
+function(params) {
   local tr = self,
 
-  config:: {
-    name: error 'must provide name',
-    namespace: error 'must provide namespace',
-    version: error 'must provide version',
-    image: error 'must provide image',
-    replicas: error 'must provide replicas',
-    objectStorageConfig: error 'must provide objectStorageConfig',
-    logLevel: 'info',
-    ruleFiles: [],
-    alertmanagersURLs: [],
-    queriers: [],
+  // Combine the defaults and the passed params to make the component's config.
+  config:: defaults + params,
+  // Safety checks for combined config of defaults and params
+  assert std.isNumber(tr.config.replicas) && tr.config.replicas >= 0 : 'thanos rule replicas has to be number >= 0',
+  assert std.isArray(tr.config.ruleFiles),
+  assert std.isArray(tr.config.rulesConfig),
+  assert std.isArray(tr.config.alertmanagersURLs),
+  assert std.isObject(tr.config.resources),
+  assert std.isBoolean(tr.config.serviceMonitor),
+  assert std.isObject(tr.config.volumeClaimTemplate),
 
-    commonLabels:: {
-      'app.kubernetes.io/name': 'thanos-rule',
-      'app.kubernetes.io/instance': tr.config.name,
-      'app.kubernetes.io/version': tr.config.version,
-      'app.kubernetes.io/component': 'rule-evaluation-engine',
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
     },
+    spec: {
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(tr.config.ports[name]),
 
-    podLabelSelector:: {
-      [labelName]: tr.config.commonLabels[labelName]
-      for labelName in std.objectFields(tr.config.commonLabels)
-      if !std.setMember(labelName, ['app.kubernetes.io/version'])
+          name: name,
+          port: tr.config.ports[name],
+          targetPort: tr.config.ports[name],
+        }
+        for name in std.objectFields(tr.config.ports)
+      ],
+      clusterIP: 'None',
+      selector: tr.config.podLabelSelector,
     },
   },
 
-  service:
-    local service = k.core.v1.service;
-    local ports = service.mixin.spec.portsType;
-
-    service.new(
-      tr.config.name,
-      tr.config.podLabelSelector,
-      [
-        ports.newNamed('grpc', 10901, 'grpc'),
-        ports.newNamed('http', 10902, 'http'),
-      ],
-    ) +
-    service.mixin.metadata.withNamespace(tr.config.namespace) +
-    service.mixin.metadata.withLabels(tr.config.commonLabels) +
-    service.mixin.spec.withClusterIp('None'),
-
   statefulSet:
-    local statefulSet = k.apps.v1.statefulSet;
-    local volume = statefulSet.mixin.spec.template.spec.volumesType;
-    local container = statefulSet.mixin.spec.template.spec.containersType;
-    local containerEnv = container.envType;
-    local containerVolumeMount = container.volumeMountsType;
-
-    local c =
-      container.new('thanos-rule', tr.config.image) +
-      container.withTerminationMessagePolicy('FallbackToLogsOnError') +
-      container.withArgs(
+    local c = {
+      name: 'thanos-rule',
+      image: tr.config.image,
+      args:
         [
           'rule',
           '--log.level=' + tr.config.logLevel,
-          '--grpc-address=0.0.0.0:%d' % tr.service.spec.ports[0].port,
-          '--http-address=0.0.0.0:%d' % tr.service.spec.ports[1].port,
+          '--log.format=' + tr.config.logFormat,
+          '--grpc-address=0.0.0.0:%d' % tr.config.ports.grpc,
+          '--http-address=0.0.0.0:%d' % tr.config.ports.http,
           '--objstore.config=$(OBJSTORE_CONFIG)',
           '--data-dir=/var/thanos/rule',
           '--label=rule_replica="$(NAME)"',
@@ -68,180 +94,111 @@ local k = import 'ksonnet/ksonnet.beta.4/k.libsonnet';
         ] +
         (['--query=%s' % querier for querier in tr.config.queriers]) +
         (['--rule-file=%s' % path for path in tr.config.ruleFiles]) +
-        (['--alertmanagers.url=%s' % url for url in tr.config.alertmanagersURLs])
-      ) +
-      container.withEnv([
-        containerEnv.fromFieldPath('NAME', 'metadata.name'),
-        containerEnv.fromSecretRef(
-          'OBJSTORE_CONFIG',
-          tr.config.objectStorageConfig.name,
-          tr.config.objectStorageConfig.key,
+        (['--alertmanagers.url=%s' % url for url in tr.config.alertmanagersURLs]) +
+        (
+          if std.length(tr.config.rulesConfig) > 0 then [
+            '--rule-file=/etc/thanos/rules/' + ruleConfig.name + '/' + ruleConfig.key
+            for ruleConfig in tr.config.rulesConfig
+          ]
+          else []
+        ) + (
+          if std.length(tr.config.tracing) > 0 then [
+            '--tracing.config=' + std.manifestYamlDoc(
+              { config+: { service_name: defaults.name } } + tr.config.tracing
+            ),
+          ] else []
         ),
-      ]) +
-      container.withVolumeMounts([
-        containerVolumeMount.new('data', '/var/thanos/rule', false),
-      ]) +
-      container.withPorts([
-        { name: 'grpc', containerPort: tr.service.spec.ports[0].port },
-        { name: 'http', containerPort: tr.service.spec.ports[1].port },
-      ]) +
-      container.mixin.livenessProbe +
-      container.mixin.livenessProbe.withPeriodSeconds(5) +
-      container.mixin.livenessProbe.withFailureThreshold(24) +
-      container.mixin.livenessProbe.httpGet.withPort(tr.service.spec.ports[1].port) +
-      container.mixin.livenessProbe.httpGet.withScheme('HTTP') +
-      container.mixin.livenessProbe.httpGet.withPath('/-/healthy') +
-      container.mixin.readinessProbe +
-      container.mixin.readinessProbe.withInitialDelaySeconds(10) +
-      container.mixin.readinessProbe.withPeriodSeconds(5) +
-      container.mixin.readinessProbe.withFailureThreshold(18) +
-      container.mixin.readinessProbe.httpGet.withPort(tr.service.spec.ports[1].port) +
-      container.mixin.readinessProbe.httpGet.withScheme('HTTP') +
-      container.mixin.readinessProbe.httpGet.withPath('/-/ready');
+      env: [
+        { name: 'NAME', valueFrom: { fieldRef: { fieldPath: 'metadata.name' } } },
+        { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
+          key: tr.config.objectStorageConfig.key,
+          name: tr.config.objectStorageConfig.name,
+        } } },
+      ],
+      ports: [
+        { name: name, containerPort: tr.config.ports[name] }
+        for name in std.objectFields(tr.config.ports)
+      ],
+      volumeMounts: [{
+        name: 'data',
+        mountPath: '/var/thanos/rule',
+        readOnly: false,
+      }] + (
+        if std.length(tr.config.rulesConfig) > 0 then [
+          { name: ruleConfig.name, mountPath: '/etc/thanos/rules/' + ruleConfig.name }
+          for ruleConfig in tr.config.rulesConfig
+        ] else []
+      ),
+      livenessProbe: { failureThreshold: 24, periodSeconds: 5, httpGet: {
+        scheme: 'HTTP',
+        port: tr.config.ports.http,
+        path: '/-/healthy',
+      } },
+      readinessProbe: { failureThreshold: 18, periodSeconds: 5, initialDelaySeconds: 10, httpGet: {
+        scheme: 'HTTP',
+        port: tr.config.ports.http,
+        path: '/-/ready',
 
-    statefulSet.new(tr.config.name, tr.config.replicas, c, [], tr.config.commonLabels) +
-    statefulSet.mixin.metadata.withNamespace(tr.config.namespace) +
-    statefulSet.mixin.metadata.withLabels(tr.config.commonLabels) +
-    statefulSet.mixin.spec.withServiceName(tr.service.metadata.name) +
-    statefulSet.mixin.spec.selector.withMatchLabels(tr.config.podLabelSelector) +
-    statefulSet.mixin.spec.template.spec.withVolumes([
-      volume.fromEmptyDir('data'),
-    ]) + {
-      spec+: {
-        volumeClaimTemplates: null,
-      },
-    },
+      } },
+      resources: if tr.config.resources != {} then tr.config.resources else {},
+      terminationMessagePolicy: 'FallbackToLogsOnError',
+    };
 
-  withServiceMonitor:: {
-    local tr = self,
-    serviceMonitor: {
-      apiVersion: 'monitoring.coreos.com/v1',
-      kind: 'ServiceMonitor',
-      metadata+: {
+    {
+      apiVersion: 'apps/v1',
+      kind: 'StatefulSet',
+      metadata: {
         name: tr.config.name,
         namespace: tr.config.namespace,
         labels: tr.config.commonLabels,
       },
       spec: {
-        selector: {
-          matchLabels: tr.config.podLabelSelector,
-        },
-        endpoints: [
-          {
-            port: 'http',
-            relabelings: [{
-              sourceLabels: ['namespace', 'pod'],
-              separator: '/',
-              targetLabel: 'instance',
-            }],
+        replicas: tr.config.replicas,
+        selector: { matchLabels: tr.config.podLabelSelector },
+        serviceName: tr.service.metadata.name,
+        template: {
+          metadata: {
+            labels: tr.config.commonLabels,
           },
-        ],
-      },
-    },
-  },
-
-  withVolumeClaimTemplate:: {
-    local tr = self,
-    config+:: {
-      volumeClaimTemplate: error 'must provide volumeClaimTemplate',
-    },
-    statefulSet+: {
-      spec+: {
-        template+: {
-          spec+: {
-            volumes: std.filter(function(v) v.name != 'data', super.volumes),
-          },
-        },
-        volumeClaimTemplates: [tr.config.volumeClaimTemplate {
-          metadata+: {
-            name: 'data',
-            labels+: tr.config.podLabelSelector,
-          },
-        }],
-      },
-    },
-  },
-
-  withResources:: {
-    local tr = self,
-    config+:: {
-      resources: error 'must provide resources',
-    },
-
-    statefulSet+: {
-      spec+: {
-        template+: {
-          spec+: {
-            containers: [
-              if c.name == 'thanos-rule' then c {
-                resources: tr.config.resources,
-              } else c
-              for c in super.containers
-            ],
-          },
-        },
-      },
-    },
-  },
-
-  withAlertmanagers:: {
-    local tr = self,
-    config+:: {
-      alertmanagersURL: error 'must provide alertmanagersURL',
-    },
-
-    statefulSet+: {
-      spec+: {
-        template+: {
-          spec+: {
-            containers: [
-              if c.name == 'thanos-rule' then c {
-                args+: [
-                  '--alertmanagers.url=' + alertmanagerURL,
-                  for alertmanagerURL in tr.config.alertmanagersURL
-                ],
-              } else c
-              for c in super.containers
-            ],
-          },
-        },
-      },
-    },
-  },
-
-  withRules:: {
-    local tr = self,
-    config+:: {
-      rulesConfig: error 'must provide rulesConfig',
-    },
-
-    statefulSet+: {
-      spec+: {
-        template+: {
-          spec+: {
-            containers: [
-              if c.name == 'thanos-rule' then c {
-                args+: [
-                  '--rule-file=/etc/thanos/rules/' + ruleConfig.name + '/' + ruleConfig.key,
-                  for ruleConfig in tr.config.rulesConfig
-                ],
-                volumeMounts+: [
-                  { name: ruleConfig.name, mountPath: '/etc/thanos/rules/' + ruleConfig.name },
-                  for ruleConfig in tr.config.rulesConfig
-                ],
-              } else c
-              for c in super.containers
-            ],
-
-            local volume = k.apps.v1.statefulSet.mixin.spec.template.spec.volumesType,
-            volumes+: [
-              volume.withName(ruleConfig.name) +
-              volume.mixin.configMap.withName(ruleConfig.name),
+          spec: {
+            containers: [c],
+            volumes: [
+              { name: ruleConfig.name, configMap: { name: ruleConfig.name } }
               for ruleConfig in tr.config.rulesConfig
             ],
           },
         },
+        volumeClaimTemplates: if std.length(tr.config.volumeClaimTemplate) > 0 then [tr.config.volumeClaimTemplate {
+          metadata+: {
+            name: 'data',
+            labels+: tr.config.podLabelSelector,
+          },
+        }] else [],
       },
+    },
+
+  serviceMonitor: if tr.config.serviceMonitor == true then {
+    apiVersion: 'monitoring.coreos.com/v1',
+    kind: 'ServiceMonitor',
+    metadata+: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
+    },
+    spec: {
+      selector: {
+        matchLabels: tr.config.podLabelSelector,
+      },
+      endpoints: [
+        {
+          port: 'http',
+          relabelings: [{
+            sourceLabels: ['namespace', 'pod'],
+            separator: '/',
+            targetLabel: 'instance',
+          }],
+        },
+      ],
     },
   },
 }

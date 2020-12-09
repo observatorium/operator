@@ -1,34 +1,97 @@
-{
+// These are the defaults for this components configuration.
+// When calling the function to generate the component's manifest,
+// you can pass an object structured like the default to overwrite default values.
+local defaults = {
+  local defaults = self,
+  name: error 'must provide name',
+  image: error 'must provide image',
+  version: error 'must provide version',
+  namespace: error 'must provide namespace',
+  tlsSecret: '%s-tls' % [defaults.name],
+  tlsCertKey: 'tls.crt',  // the key in the config map for the cert
+  tlsKeyKey: 'tls.key',  // the key in the config map for the cert key
+  config: {
+    issuer: 'https://%s.%s.svc.cluster.local:5556/dex' % [defaults.name, defaults.namespace],
+    storage: {
+      type: 'sqlite3',
+      config: { file: '/storage/dex.db' },
+    },
+    web: {
+      https: '0.0.0.0:5556',
+      tlsCert: '/etc/dex/tls/tls.crt',
+      tlsKey: '/etc/dex/tls/tls.key',
+    },
+    logger: { level: 'debug' },
+  },
+  ports: { http: 5556 },
+
+  commonLabels:: {
+    'app.kubernetes.io/name': 'dex',
+    'app.kubernetes.io/instance': defaults.name,
+    'app.kubernetes.io/version': defaults.version,
+    'app.kubernetes.io/component': 'identity-provider',
+  },
+};
+
+function(params) {
   local dex = self,
 
-  config:: {
-    name: error 'must provide name',
-    image: error 'must provide image',
-    version: error 'must provide version',
-    namespace: error 'must provide namespace',
-    config: {
-      issuer: 'http://%s.%s.svc.cluster.local:5556/dex' % [dex.config.name, dex.config.namespace],
-      storage: {
-        type: 'sqlite3',
-        config: {
-          file: '/storage/dex.db',
-        },
-      },
-      web: {
-        http: '0.0.0.0:5556',
-      },
-      logger: {
-        level: 'debug',
+  // Combine the defaults and the passed params to make the component's config.
+  config:: defaults + params,
+
+  secret: {
+    apiVersion: 'v1',
+    stringData: {
+      'config.yaml': std.manifestYamlDoc(dex.config.config),
+    },
+    kind: 'Secret',
+    metadata: {
+      labels: dex.config.commonLabels,
+      name: dex.config.name,
+      namespace: dex.config.namespace,
+    },
+  },
+
+  pvc: {
+    apiVersion: 'v1',
+    kind: 'PersistentVolumeClaim',
+    metadata: {
+      labels: dex.config.commonLabels,
+      name: dex.config.name,
+      namespace: dex.config.namespace,
+    },
+    spec: {
+      accessModes: ['ReadWriteOnce'],
+      resources: {
+        requests: { storage: '1Gi' },
       },
     },
+  },
 
-    commonLabels:: {
-      'app.kubernetes.io/name': 'dex',
-      'app.kubernetes.io/instance': dex.config.name,
-      'app.kubernetes.io/version': dex.config.version,
-      'app.kubernetes.io/component': 'identity-provider',
+  service: {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: {
+      labels: dex.config.commonLabels,
+      name: dex.config.name,
+      namespace: dex.config.namespace,
     },
+    spec: {
+      ports: [
+        {
+          assert std.isString(name),
+          assert std.isNumber(dex.config.ports[name]),
 
+          name: name,
+          port: dex.config.ports[name],
+          targetPort: dex.config.ports[name],
+          protocol: 'TCP',
+        }
+        for name in std.objectFields(dex.config.ports)
+      ],
+      selector: dex.config.commonLabels,
+      type: 'ClusterIP',
+    },
   },
 
   deployment: {
@@ -54,21 +117,13 @@
               name: 'dex',
               command: ['/usr/local/bin/dex', 'serve', '/etc/dex/cfg/config.yaml'],
               ports: [
-                {
-                  name: 'http',
-                  containerPort: 5556,
-                },
+                { name: name, containerPort: dex.config.ports[name] }
+                for name in std.objectFields(dex.config.ports)
               ],
               volumeMounts: [
-                {
-                  name: 'config',
-                  mountPath: '/etc/dex/cfg',
-                },
-                {
-                  name: 'storage',
-                  mountPath: '/storage',
-                  readOnly: false,
-                },
+                { name: 'config', mountPath: '/etc/dex/cfg' },
+                { name: 'storage', mountPath: '/storage', readOnly: false },
+                { name: 'tls', mountPath: '/etc/dex/tls' },
               ],
             },
           ],
@@ -78,83 +133,33 @@
               secret: {
                 secretName: dex.config.name,
                 items: [
-                  {
-                    key: 'config.yaml',
-                    path: 'config.yaml',
-                  },
+                  { key: 'config.yaml', path: 'config.yaml' },
                 ],
               },
             },
             {
               name: 'storage',
-              persistentVolumeClaim: {
-                claimName: dex.config.name,
+              persistentVolumeClaim: { claimName: dex.config.name },
+            },
+            {
+              name: 'tls',
+              secret: {
+                secretName: dex.config.tlsSecret,
+                items: [
+                  {
+                    key: dex.config.tlsCertKey,
+                    path: 'tls.crt',
+                  },
+                  {
+                    key: dex.config.tlsKeyKey,
+                    path: 'tls.key',
+                  },
+                ],
               },
             },
           ],
         },
       },
     },
-  },
-
-  secret: {
-    apiVersion: 'v1',
-    stringData: {
-      'config.yaml': std.manifestYamlDoc(dex.config.config),
-    },
-    kind: 'Secret',
-    metadata: {
-      labels: dex.config.commonLabels,
-      name: dex.config.name,
-      namespace: dex.config.namespace,
-    },
-  },
-
-  pvc: {
-    apiVersion: 'v1',
-    kind: 'PersistentVolumeClaim',
-    metadata: {
-      labels: dex.config.commonLabels,
-      name: dex.config.name,
-      namespace: dex.config.namespace,
-    },
-    spec: {
-      accessModes: [
-        'ReadWriteOnce',
-      ],
-      resources: {
-        requests: {
-          storage: '1Gi',
-        },
-      },
-    },
-  },
-
-  service: {
-    apiVersion: 'v1',
-    kind: 'Service',
-    metadata: {
-      labels: dex.config.commonLabels,
-      name: dex.config.name,
-      namespace: dex.config.namespace,
-    },
-    spec: {
-      ports: [
-        {
-          port: 5556,
-          protocol: 'TCP',
-          targetPort: 5556,
-        },
-      ],
-      selector: dex.config.commonLabels,
-      type: 'ClusterIP',
-    },
-  },
-
-  manifests+:: {
-    'dex-deployment': dex.deployment,
-    'dex-secret': dex.secret,
-    'dex-pvc': dex.pvc,
-    'dex-service': dex.service,
   },
 }

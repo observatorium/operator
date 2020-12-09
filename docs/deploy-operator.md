@@ -1,14 +1,15 @@
 # Observatorium Operator
+
 ![Observatorium](https://avatars0.githubusercontent.com/u/51818702?s=100&v=4sanitize=true)
 
 ## Prelude
 
 Check the following resources for more information about Observatorium:
+
 * [Documentation repository](https://github.com/observatorium/docs/)
 * [Observatorium API](https://github.com/observatorium/observatorium/)
 * [Observatorium deployments repository](https://github.com/observatorium/deployments)
 * [Locutus - The framework which the operator is based on](https://github.com/brancz/locutus)
-
 
 ## How to deploy - Kubernetes and OpenShift
 
@@ -17,14 +18,16 @@ In order to ease the installation of Observatorium, an operator is available.
 ### Prerequisites
 
 #### Create Namespaces
-```shell script
+
+```shell
 kubectl create namespace observatorium
 ```
 
-
 #### S3 storage endpoint and secret
+
 For **testing purposes** you may use [minio](https://github.com/minio/minio) as describe below.
-```shell script
+
+```shell
 kubectl create namespace observatorium-minio
 kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-secret-thanos.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-pvc.yaml
@@ -35,39 +38,47 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/mas
 ### Deployment
 
 #### Prometheus CRDs - Kubernetes Only
+
 You may skip this step if you are using OpenShift, in which the CRD is already available as a part of the monitoring stack.
-```shell script
+```shell
 kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
 kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0prometheusruleCustomResourceDefinition.yaml
 ```
 
 #### RBAC Configuration
-```shell script
+
+```shell
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/cluster_role.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/cluster_role_binding.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/service_account.yaml
 ```
 
 #### Deploy Observatorium CRD and Operator
+
 * In case you need to force a new image download (e.g. development environment), please refer to the [development section](#Development).
-```shell script
+
+```shell
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/crds/core.observatorium.io_observatoria.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/operator.yaml
 ```
 
 ## Deploy an example CR
-```shell script
+
+```shell
 kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/operator/master/example/manifests/observatorium.yaml
 ```
+
 Monitor the CR status and wait for status --> Finished
-```shell script
+
+```shell
 kubectl -n observatorium get observatoria.core.observatorium.io observatorium-xyz -o=jsonpath='{.status.conditions[*].currentStatus}'
 
 Finished
 ```
 
 ### Expected Result
-```shell script
+
+```shell
 kubectl -n observatorium get all
 
 NAME                                                              READY   STATUS    RESTARTS   AGE
@@ -119,29 +130,38 @@ statefulset.apps/observatorium-xyz-thanos-store-shard-0     1/1     23s
 ## Test
 
 ### Expose observatorium API for external traffic
+
 * In Kubernetes
-```shell script
+
+```shell
 kubectl -n observatorium patch svc observatorium-xyz-observatorium-api --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
 ```
+
 * In OpenShift
-```shell script
+
+```shell
 oc -n observatorium expose svc observatorium-xyz-observatorium-api --port=public
 ```
 
 ### (Option A) Transmit Metrics via Remote Write Client
-```shell script
+
+```shell
 kubectl -n default apply -f https://raw.githubusercontent.com/observatorium/deployments/master/tests/manifests/observatorium-up-metrics.yaml
 kubectl wait --for=condition=complete --timeout=5m -n default job/observatorium-up
 ````
+
 Result
-```shell script
+
+```shell
 job.batch/observatorium-up condition met
 ```
 
 ### (Option B) Configure Prometheus Remote Write
+
 * Example taken from CRC (Openshift), Prometheus deployed as a part of the monitoring operator.
 * Note: If this is applied to a separate cluster, the url should be dns resolvable.
-```shell script
+
+```shell
 cat << EOF | kubectl -n openshift-monitoring apply -f -
 apiVersion: v1
 data:
@@ -159,33 +179,42 @@ EOF
 ```
 
 ### Grafana
+
 Data source is set to query the observatorium-api, which proxies the request to thanos-query.
 Thus, the data source URL: `http://observatorium-xyz-observatorium-api.observatorium.svc.cluster.local:8080/api/metrics/v1`
 
 #### Deploy Grafana
-```shell script
+
+```shell
 kubectl -n observatorium apply -f https://raw.githubusercontent.com/observatorium/operator/master/docs/grafana/grafana.yaml
 kubectl -n observatorium apply -f https://raw.githubusercontent.com/observatorium/operator/master/docs/grafana/grafana-cm.yaml
 kubectl -n observatorium apply -f https://raw.githubusercontent.com/observatorium/operator/master/docs/grafana/grafana-svc.yaml
 ```
 
 #### Expose Grafana for external traffic
+
 * In Kubernetes
-```shell script
+
+```shell
 kubectl -n observatorium patch svc grafana --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
 ```
+
 * In OpenShift
-```shell script
+
+```shell
 oc -n observatorium expose svc grafana
 ```
 
 #### Browse Grafana
+
 You should now be able to see the 'foo' metric generated by the up client you invoked beforehand.
 ![Multi Cluster Architecture](./grafana-observatorium.png)
 
 ## Development
-* Create the operator while forcing Kubernetes / OpenShift to download the image.  
-```shell script
+
+* Create the operator while forcing Kubernetes / OpenShift to download the image.
+
+```shell
 curl https://raw.githubusercontent.com/observatorium/operator/master/manifests/operator.yaml | \
 sed 's/imagePullPolicy\: IfNotPresent/imagePullPolicy\: Always/g' > observatorium-operator.yaml && \
 kubectl -n default create -f observatorium-operator.yaml && rm -f observatorium-operator.yaml

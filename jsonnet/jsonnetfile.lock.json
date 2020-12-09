@@ -4,63 +4,12 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/grafana/grafonnet-lib.git",
-          "subdir": "grafonnet"
-        }
-      },
-      "version": "8338be68387b5811355aa919d031882ead0c9c6e",
-      "sum": "RixjNQccHT+UlCSvlR4HBiFcTRVdwDz5goWSHEXIf58="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/grafana/jsonnet-libs.git",
-          "subdir": "grafana-builder"
-        }
-      },
-      "version": "de586e2ac76e9bcee87d34f0042abe1a2ef7cdf3",
-      "sum": "R5WJe6wW0R9vMpOAHaGFwcK8q4NmGZ0aLhdZGKDHeMU="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/jaegertracing/jaeger.git",
-          "subdir": "monitoring/jaeger-mixin"
-        }
-      },
-      "version": "6f8fe448c7a021bbdac78e5d848e2fb7346a1d99",
-      "sum": "U/RwaRP/ps+5dVyeVxeFEb2psfZHQgEjHU2Jeb454Kg="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/ksonnet/ksonnet-lib.git",
-          "subdir": ""
-        }
-      },
-      "version": "0d2f82676817bbf9e4acf6495b2090205f323b9f",
-      "sum": "h28BXZ7+vczxYJ2sCt8JuR9+yznRtU/iA6DCpQUrtEg=",
-      "name": "ksonnet"
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/metalmatze/slo-libsonnet.git",
-          "subdir": "slo-libsonnet"
-        }
-      },
-      "version": "101618191a5dae835f7c8a90e6f0df40072e2cb3",
-      "sum": "vERnAgUe02tI7S4cRK2KSEsyuVm6XFT9v8RucCG/8B8="
-    },
-    {
-      "source": {
-        "git": {
           "remote": "https://github.com/observatorium/deployments.git",
           "subdir": ""
         }
       },
-      "version": "5dd39ee2c5c85b2d64583886374c9b7ac615daa7",
-      "sum": "qVAwyeF02VVlPmDoFp5LKCZcObHx3Q7zlbQoMAlgWCI="
+      "version": "d60a4ab46b795cabe99d3ea88df5e3ba68911551",
+      "sum": "zS8CdDvM/JZ7u6IMaLIZnQN3CcdrZqfiZECSPyFe5ho="
     },
     {
       "source": {
@@ -69,8 +18,8 @@
           "subdir": "jsonnet/lib"
         }
       },
-      "version": "61a908f68dd14370c7a5ff4daa9a939f3de4e8f1",
-      "sum": "EL4Ya4FBqpjNxVgEZWpbYnX5xOE9DmBJKtoGQnPWMoc=",
+      "version": "b4d2f9e4074fe321b06906a81d8dd353d6318bf6",
+      "sum": "COiE/nS+SDkbOomr5Q0nj9gD1O/BBCtiGHFjlNgjsU4=",
       "name": "observatorium"
     },
     {
@@ -80,19 +29,20 @@
           "subdir": "jsonnet/lib"
         }
       },
-      "version": "a9d9169ef2c4da1eafd6badbc90a4b4804c8c101",
-      "sum": "iUbwzPZ/0QrozWTfoXlmRhd1CMAnkcCaWtATTlSnoMk=",
+      "version": "640385d4b1a08f70df2db76a58b46512241d41ef",
+      "sum": "sqF9titAn3N2HHKY9mCzbZ+d/xL5ZBQ/ej/t190jY6o=",
       "name": "thanos-receive-controller"
     },
     {
       "source": {
         "git": {
-          "remote": "https://github.com/observatorium/thanos-receive-controller.git",
-          "subdir": "jsonnet/thanos-receive-controller-mixin"
+          "remote": "https://github.com/observatorium/up.git",
+          "subdir": "jsonnet"
         }
       },
-      "version": "a9d9169ef2c4da1eafd6badbc90a4b4804c8c101",
-      "sum": "/m671jdzWQfkKGuPN2jN6W8/rnbzEBgG6bLzr4erRGs="
+      "version": "ec9ecc69c91cce9d6f6d7ce4c0054424c697a8a4",
+      "sum": "0FKabnXd0rMeu8YpkkopEOknqBf5PLq/DIIDd0ve7cU=",
+      "name": "up"
     },
     {
       "source": {
@@ -101,18 +51,8 @@
           "subdir": "jsonnet/kube-thanos"
         }
       },
-      "version": "66b017f9c7a4f4ef1ae19e1c275273b3c3a0a954",
-      "sum": "lP+c4wuQb3j263kKwMqhBUno0rSAQIdbdv4QCqo1HB4="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/thanos-io/thanos.git",
-          "subdir": "mixin"
-        }
-      },
-      "version": "7f0364db2333aaf03bc7cb4b88ed737402f69b5b",
-      "sum": "N9utIFDClAjZ3Jgp0GY/JY34Qg2cy0n9oWcmT/ctnM0="
+      "version": "d7696758dd8b90d8f6d02e7739a21ce34b48c8c1",
+      "sum": "cmvtINsnwAGR+ZFiz5cGg+9TRfQhnkGwiKQEqXmB5dQ="
     }
   ],
   "legacyImports": false

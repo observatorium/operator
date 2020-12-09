@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/instance: observatorium-xyz
     app.kubernetes.io/name: thanos-store
     app.kubernetes.io/part-of: observatorium
-    app.kubernetes.io/version: master-2020-08-12-70f89d83
+    app.kubernetes.io/version: v0.17.1
     store.observatorium.io/shard: shard-0
   name: observatorium-xyz-thanos-store-shard-0
   namespace: observatorium
@@ -27,7 +27,7 @@ spec:
         app.kubernetes.io/instance: observatorium-xyz
         app.kubernetes.io/name: thanos-store
         app.kubernetes.io/part-of: observatorium
-        app.kubernetes.io/version: master-2020-08-12-70f89d83
+        app.kubernetes.io/version: v0.17.1
         store.observatorium.io/shard: shard-0
     spec:
       affinity:
@@ -52,11 +52,12 @@ spec:
       - args:
         - store
         - --log.level=info
+        - --log.format=logfmt
         - --data-dir=/var/thanos/store
         - --grpc-address=0.0.0.0:10901
         - --http-address=0.0.0.0:10902
         - --objstore.config=$(OBJSTORE_CONFIG)
-        - --experimental.enable-index-cache-postings-compression
+        - --ignore-deletion-marks-delay=24h
         - |-
           --index-cache.config="config":
             "addresses":
@@ -92,7 +93,6 @@ spec:
           "metafile_exists_ttl": "2h"
           "metafile_max_size": "1MiB"
           "type": "memcached"
-        - --ignore-deletion-marks-delay=24h
         - |
           --selector.relabel-config=
             - action: hashmod
@@ -108,7 +108,7 @@ spec:
             secretKeyRef:
               key: thanos.yaml
               name: thanos-objectstorage
-        image: quay.io/thanos/thanos:master-2020-08-12-70f89d83
+        image: quay.io/thanos/thanos:v0.17.1
         livenessProbe:
           failureThreshold: 8
           httpGet:
@@ -129,13 +129,26 @@ spec:
             port: 10902
             scheme: HTTP
           periodSeconds: 5
+        resources: {}
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - mountPath: /var/thanos/store
           name: data
           readOnly: false
       terminationGracePeriodSeconds: 120
-      volumes:
-      - emptyDir: {}
-        name: data
-  volumeClaimTemplates: null
+      volumes: []
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/component: object-store-gateway
+        app.kubernetes.io/instance: observatorium-xyz
+        app.kubernetes.io/name: thanos-store
+        app.kubernetes.io/part-of: observatorium
+        store.observatorium.io/shard: shard-0
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
