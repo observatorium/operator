@@ -1,4 +1,8 @@
 SHELL=/usr/bin/env bash -o pipefail
+
+GOBIN ?= $(shell pwd)/tmp/bin
+BIN_DIR ?= $(GOBIN)
+
 include .bingo/Variables.mk
 
 VERSION := $(strip $(shell [ -d .git ] && git describe --always --tags --dirty))
@@ -8,8 +12,8 @@ VCS_BRANCH := $(strip $(shell git rev-parse --abbrev-ref HEAD))
 VCS_REF := $(strip $(shell [ -d .git ] && git rev-parse --short HEAD))
 DOCKER_REPO ?= quay.io/observatorium/observatorium-operator
 
-BIN_DIR ?= $(shell pwd)/tmp/bin
-CONTROLLER_GEN ?= $(BIN_DIR)/controller-gen
+help: ## Displays help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: example/manifests/observatorium.yaml manifests/crds/core.observatorium.io_observatoria.yaml
@@ -20,21 +24,21 @@ manifests/crds/core.observatorium.io_observatoria.yaml: $(CONTROLLER_GEN) $(find
 example/manifests/observatorium.yaml: example/main.jsonnet
 	$(JSONNET) -J jsonnet/vendor example/main.jsonnet | $(GOJSONTOYAML) > example/manifests/observatorium.yaml
 
-# Run go fmt against code
+fmt: ## Run go fmt against code
 fmt:
 	go fmt ./...
 
-# Run go vet against code
+vet: ## Run go vet against code
 vet:
 	go vet ./...
 
-# Generate code
+generate: ## Generate code.
 generate: api/v1alpha1/zz_generated.deepcopy.go
 
 api/v1alpha1/zz_generated.deepcopy.go: $(CONTROLLER_GEN)
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
-# Build the docker image
+container-build: ## Build the docker image
 container-build:
 	docker build --build-arg BUILD_DATE="$(BUILD_TIMESTAMP)" \
 		--build-arg VERSION="$(VERSION)" \
@@ -43,7 +47,7 @@ container-build:
 		--build-arg DOCKERFILE_PATH="/Dockerfile" \
 		-t $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) .
 
-# Push the image
+container-push: ## Push the image
 container-push: container-build
 	docker tag $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) $(DOCKER_REPO):latest
 	docker push $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION)
@@ -68,6 +72,3 @@ jsonnet-fmt: | $(JSONNETFMT)
 # Tools
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
-
-$(CONTROLLER_GEN): $(BIN_DIR)
-	GO111MODULE="on" go build -o $@ sigs.k8s.io/controller-tools/cmd/controller-gen

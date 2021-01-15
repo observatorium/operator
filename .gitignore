@@ -1,3 +1,5 @@
 /kind
 /kubectl
 /tmp/
+/.bin
+/.idea

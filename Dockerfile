@@ -1,6 +1,5 @@
 # Build the manager binary
-FROM golang:1.13.3-alpine3.10 as builder
-# TODO(kakkoyun): Upgrade Go version.
+FROM golang:1.15.6-alpine3.12 as builder
 
 RUN apk add --update --no-cache git bash
 WORKDIR /workspace
@@ -9,9 +8,10 @@ COPY . operator/
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/components/ components/
 
 # Build
-RUN GO111MODULE="on" go build github.com/brancz/locutus
+COPY .bingo /workspace/.bingo
+RUN GO111MODULE="on" cd /workspace/.bingo && go build -mod=mod -modfile=locutus.mod -o=/workspace/locutus "github.com/brancz/locutus"
 
-FROM alpine:3.10 as runner
+FROM alpine:3.12 as runner
 
 WORKDIR /
 COPY --from=builder /workspace/locutus /
