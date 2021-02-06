@@ -9,12 +9,13 @@ COPY . operator/
 COPY ./jsonnet/vendor/github.com/observatorium/deployments/components/ components/
 
 # Build
+WORKDIR /workspace/operator
 RUN GO111MODULE="on" go build github.com/brancz/locutus
 
 FROM alpine:3.10 as runner
 
 WORKDIR /
-COPY --from=builder /workspace/locutus /
+COPY --from=builder /workspace/operator/locutus /
 COPY --from=builder /workspace/operator/jsonnet /environments/operator
 COPY --from=builder /workspace/components/ /components/
 COPY --from=builder /workspace/operator/jsonnet/vendor/ /vendor/
