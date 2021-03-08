@@ -972,6 +972,9 @@ spec:
                 image:
                   description: Thanos image
                   type: string
+                reloaderImage:
+                  description: ReloaderImage is an image of configmap reloader
+                  type: string
                 replicas:
                   description: Number of Rule replicas.
                   format: int32

@@ -55,7 +55,7 @@ local defaults = {
   podLabelSelector:: {
     [labelName]: defaults.commonLabels[labelName]
     for labelName in std.objectFields(defaults.commonLabels)
-    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+    if labelName != 'app.kubernetes.io/version'
   },
 };
 
@@ -67,24 +67,24 @@ function(params) {
     queryRangeCache+:
       if std.objectHas(params, 'queryRangeCache')
          && std.objectHas(params.queryRangeCache, 'type')
-         && params.queryRangeCache.type == 'memcached' then
+         && std.asciiUpper(params.queryRangeCache.type) == 'MEMCACHED' then
 
         defaults.memcachedDefaults + params.queryRangeCache
       else if std.objectHas(params, 'queryRangeCache')
               && std.objectHas(params.queryRangeCache, 'type')
-              && params.queryRangeCache.type == 'in-memory' then
+              && std.asciiUpper(params.queryRangeCache.type) == 'IN-MEMORY' then
 
         defaults.fifoCache + params.queryRangeCache
       else {},
     labelsCache+:
       if std.objectHas(params, 'labelsCache')
          && std.objectHas(params.labelsCache, 'type')
-         && params.labelsCache.type == 'memcached' then
+         && std.asciiUpper(params.labelsCache.type) == 'MEMCACHED' then
 
         defaults.memcachedDefaults + params.labelsCache
       else if std.objectHas(params, 'labelsCache')
               && std.objectHas(params.labelsCache, 'type')
-              && params.labelsCache.type == 'in-memory' then
+              && std.asciiUpper(params.labelsCache.type) == 'IN-MEMORY' then
 
         defaults.fifoCache + params.labelsCache
       else {},
@@ -116,6 +116,16 @@ function(params) {
         }
         for name in std.objectFields(tqf.config.ports)
       ],
+    },
+  },
+
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: tqf.config.name,
+      namespace: tqf.config.namespace,
+      labels: tqf.config.commonLabels,
     },
   },
 
@@ -154,6 +164,9 @@ function(params) {
           ),
         ] else []
       ),
+      securityContext: {
+        runAsUser: 65534,
+      },
       ports: [
         { name: name, containerPort: tqf.config.ports[name] }
         for name in std.objectFields(tqf.config.ports)
@@ -187,6 +200,10 @@ function(params) {
           metadata: { labels: tqf.config.commonLabels },
           spec: {
             containers: [c],
+            serviceAccountName: tqf.serviceAccount.metadata.name,
+            securityContext: {
+              fsGroup: 65534,
+            },
             terminationGracePeriodSeconds: 120,
             affinity: { podAntiAffinity: {
               preferredDuringSchedulingIgnoredDuringExecution: [{

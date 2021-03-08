@@ -279,6 +279,9 @@ type RuleSpec struct {
 	// AlertmanagersURL
 	// +optional
 	AlertmanagersURL []string `json:"alertmanagersURL,omitempty"`
+	// ReloaderImage is an image of configmap reloader
+	// +optional
+	ReloaderImage string `json:"reloaderImage,omitempty"`
 }
 
 type CompactSpec struct {

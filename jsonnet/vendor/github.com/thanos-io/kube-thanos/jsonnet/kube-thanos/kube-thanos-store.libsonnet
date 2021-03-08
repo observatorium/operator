@@ -9,13 +9,13 @@ function(params) {
     indexCache+:
       if std.objectHas(params, 'indexCache')
          && std.objectHas(params.indexCache, 'type')
-         && params.indexCache.type == 'memcached' then
+         && std.asciiUpper(params.indexCache.type) == 'MEMCACHED' then
         defaults.memcachedDefaults + defaults.indexCacheDefaults + params.indexCache
       else {},
     bucketCache+:
       if std.objectHas(params, 'bucketCache')
          && std.objectHas(params.bucketCache, 'type')
-         && params.bucketCache.type == 'memcached' then
+         && std.asciiUpper(params.bucketCache.type) == 'MEMCACHED' then
         defaults.memcachedDefaults + defaults.bucketCacheMemcachedDefaults + params.bucketCache
       else {},
   },
@@ -51,6 +51,16 @@ function(params) {
     },
   },
 
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: ts.config.name,
+      namespace: ts.config.namespace,
+      labels: ts.config.commonLabels,
+    },
+  },
+
   statefulSet:
     local c = {
       name: 'thanos-store',
@@ -79,6 +89,9 @@ function(params) {
           ),
         ] else []
       ),
+      securityContext: {
+        runAsUser: 65534,
+      },
       env: [
         { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
           key: ts.config.objectStorageConfig.key,
@@ -125,6 +138,10 @@ function(params) {
             labels: ts.config.commonLabels,
           },
           spec: {
+            serviceAccountName: ts.serviceAccount.metadata.name,
+            securityContext: {
+              fsGroup: 65534,
+            },
             containers: [c],
             volumes: [],
             terminationGracePeriodSeconds: 120,
