@@ -1,6 +1,6 @@
 jobs:
   build:
-    working_directory: /go/src/github.com/observatorium/deployments
+    working_directory: /go/src/github.com/observatorium/operator
     docker:
       - image: quay.io/coreos/jsonnet-ci
     steps:
@@ -25,7 +25,9 @@ jobs:
           path: /tmp/artifacts
 
   container-push:
-    machine: true
+    working_directory: /go/src/github.com/observatorium/operator
+    docker:
+      - image: quay.io/coreos/jsonnet-ci
     steps:
       - checkout
       - run: make jsonnet-vendor
