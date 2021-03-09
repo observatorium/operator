@@ -27,6 +27,7 @@ local operatorObs = obs {
       image: if std.objectHas(cr.spec.receivers, 'image') then cr.spec.receivers.image else obs.thanos.receivers.config.image,
       version: if std.objectHas(cr.spec.receivers, 'version') then cr.spec.receivers.version else obs.thanos.receivers.config.version,
       replicas: if std.objectHas(cr.spec.receivers, 'replicas') then cr.spec.receivers.replicas else obs.thanos.receivers.config.replicas,
+      replicationFactor: if std.objectHas(cr.spec.receivers, 'replicationFactor') then cr.spec.receivers.replicationFactor else obs.thanos.receivers.config.replicationFactor,
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
       debug: '',
