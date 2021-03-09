@@ -1231,7 +1231,7 @@ spec:
                   type: string
               type: object
             tolerations:
-              description: Tolerations causes all components to tolerate any taints.
+              description: Tolerations causes all components to tolerate specified taints.
               items:
                 description: The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect> using the matching operator <operator>.
                 properties:

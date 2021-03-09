@@ -51,7 +51,7 @@ type ObservatoriumSpec struct {
 	// Affinity causes all components to be scheduled on nodes with matching rules.
 	// +optional
 	Affinity *v1.Affinity `json:"affinity,omitempty"`
-	// Tolerations causes all components to tolerate any taints.
+	// Tolerations causes all components to tolerate specified taints.
 	// +optional
 	Tolerations []v1.Toleration `json:"tolerations,omitempty"`
 }
