@@ -26,8 +26,8 @@ jobs:
 
   container-push:
     working_directory: /go/src/github.com/observatorium/operator
-    docker:
-      - image: quay.io/coreos/jsonnet-ci
+    machine:
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
       - run: make jsonnet-vendor
