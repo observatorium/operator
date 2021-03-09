@@ -23,7 +23,7 @@ local api = (import 'observatorium/observatorium-api.libsonnet');
       hashring: 'default',
       tenants: [],
     }],
-    stores: {
+    stores+: {
       shards: 1,
     },
   }),
@@ -91,7 +91,7 @@ local api = (import 'observatorium/observatorium-api.libsonnet');
     name: obs.config.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
     namespace: obs.config.namespace,
     commonLabels+:: obs.config.commonLabels,
-    version: '2.0.0',
+    version: '2.1.0',
     image: 'docker.io/grafana/loki:' + cfg.version,
     replicationFactor: 1,
     replicas: {
@@ -138,8 +138,8 @@ local api = (import 'observatorium/observatorium-api.libsonnet');
     } + {
       ['thanos-' + name]: obs.thanos.manifests[name]
       for name in std.objectFields(obs.thanos.manifests)
-    } + {
+    } + if std.objectHas(obs.loki, 'manifests') then {
       ['loki-' + name]: obs.loki.manifests[name]
       for name in std.objectFields(obs.loki.manifests)
-    },
+    } else {},
 }
