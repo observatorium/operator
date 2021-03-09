@@ -8,6 +8,7 @@ local defaults = {
   version: error 'must provide version',
   image: error 'must provide image',
   replicas: error 'must provide replicas',
+  reloaderImage: error 'must provide reloader image',
   objectStorageConfig: error 'must provide objectStorageConfig',
   ruleFiles: [],
   rulesConfig: [],
@@ -33,7 +34,7 @@ local defaults = {
   podLabelSelector:: {
     [labelName]: defaults.commonLabels[labelName]
     for labelName in std.objectFields(defaults.commonLabels)
-    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+    if labelName != 'app.kubernetes.io/version'
   },
 };
 
@@ -76,6 +77,16 @@ function(params) {
     },
   },
 
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
+    },
+  },
+
   statefulSet:
     local c = {
       name: 'thanos-rule',
@@ -108,6 +119,9 @@ function(params) {
             ),
           ] else []
         ),
+      securityContext: {
+        runAsUser: 65534,
+      },
       env: [
         { name: 'NAME', valueFrom: { fieldRef: { fieldPath: 'metadata.name' } } },
         { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
@@ -144,6 +158,20 @@ function(params) {
       terminationMessagePolicy: 'FallbackToLogsOnError',
     };
 
+    local reloadContainer = {
+      name: 'configmap-reloader',
+      image: tr.config.reloaderImage,
+      args:
+        [
+          '-webhook-url=http://localhost:' + tr.service.spec.ports[1].port + '/-/reload',
+        ] +
+        (['-volume-dir=/etc/thanos/rules/' + ruleConfig.name for ruleConfig in tr.config.rulesConfig]),
+      volumeMounts: [
+        { name: ruleConfig.name, mountPath: '/etc/thanos/rules/' + ruleConfig.name }
+        for ruleConfig in tr.config.rulesConfig
+      ],
+    };
+
     {
       apiVersion: 'apps/v1',
       kind: 'StatefulSet',
@@ -161,7 +189,12 @@ function(params) {
             labels: tr.config.commonLabels,
           },
           spec: {
-            containers: [c],
+            serviceAccountName: tr.serviceAccount.metadata.name,
+            securityContext: {
+              fsGroup: 65534,
+            },
+            containers: [c] +
+                        (if std.length(tr.config.rulesConfig) > 0 then [reloadContainer] else []),
             volumes: [
               { name: ruleConfig.name, configMap: { name: ruleConfig.name } }
               for ruleConfig in tr.config.rulesConfig

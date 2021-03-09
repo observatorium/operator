@@ -26,7 +26,7 @@ local defaults = {
   podLabelSelector:: {
     [labelName]: defaults.commonLabels[labelName]
     for labelName in std.objectFields(defaults.commonLabels)
-    if !std.setMember(labelName, ['app.kubernetes.io/version'])
+    if labelName != 'app.kubernetes.io/version'
   },
 };
 
@@ -63,6 +63,16 @@ function(params) {
     },
   },
 
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: tb.config.name,
+      namespace: tb.config.namespace,
+      labels: tb.config.commonLabels,
+    },
+  },
+
   deployment:
     local container = {
       name: 'thanos-bucket',
@@ -81,6 +91,9 @@ function(params) {
           ),
         ] else []
       ),
+      securityContext: {
+        runAsUser: 65534,
+      },
       env: [
         { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
           key: tb.config.objectStorageConfig.key,
@@ -119,6 +132,10 @@ function(params) {
         template: {
           metadata: { labels: tb.config.commonLabels },
           spec: {
+            serviceAccountName: tb.serviceAccount.metadata.name,
+            securityContext: {
+              fsGroup: 65534,
+            },
             containers: [container],
             terminationGracePeriodSeconds: 120,
           },

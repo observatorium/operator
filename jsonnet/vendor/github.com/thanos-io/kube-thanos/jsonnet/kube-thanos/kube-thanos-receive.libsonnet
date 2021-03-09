@@ -37,6 +37,16 @@ function(params) {
     },
   },
 
+  serviceAccount: {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: tr.config.name,
+      namespace: tr.config.namespace,
+      labels: tr.config.commonLabels,
+    },
+  },
+
   statefulSet:
     local localEndpointFlag = '--receive.local-endpoint=$(NAME).%s.$(NAMESPACE).svc.cluster.local:%d' % [
       tr.config.name,
@@ -56,11 +66,16 @@ function(params) {
         '--receive.replication-factor=%d' % tr.config.replicationFactor,
         '--objstore.config=$(OBJSTORE_CONFIG)',
         '--tsdb.path=/var/thanos/receive',
-        '--label=replica="$(NAME)"',
-        '--label=receive="true"',
         '--tsdb.retention=' + tr.config.retention,
         localEndpointFlag,
+      ] + [
+        '--label=%s' % label
+        for label in tr.config.labels
       ] + (
+        if tr.config.tenantLabelName != null then [
+          '--receive.tenant-label-name=%s' % tr.config.tenantLabelName,
+        ] else []
+      ) + (
         if tr.config.hashringConfigMapName != '' then [
           '--receive.hashrings-file=/var/lib/thanos-receive/hashrings.json',
         ] else []
@@ -71,6 +86,9 @@ function(params) {
           ),
         ] else []
       ),
+      securityContext: {
+        runAsUser: 65534,
+      },
       env: [
         { name: 'NAME', valueFrom: { fieldRef: { fieldPath: 'metadata.name' } } },
         { name: 'NAMESPACE', valueFrom: { fieldRef: { fieldPath: 'metadata.namespace' } } },
@@ -123,6 +141,10 @@ function(params) {
             labels: tr.config.commonLabels,
           },
           spec: {
+            serviceAccountName: tr.serviceAccount.metadata.name,
+            securityContext: {
+              fsGroup: 65534,
+            },
             containers: [c],
             volumes: if tr.config.hashringConfigMapName != '' then [{
               name: 'hashring-config',
@@ -194,7 +216,7 @@ function(params) {
     },
   },
 
-  podDisruptionBudget: {
+  podDisruptionBudget: if tr.config.podDisruptionBudgetMaxUnavailable >= 1 then {
     apiVersion: 'policy/v1beta1',
     kind: 'PodDisruptionBudget',
     metadata: {
@@ -205,5 +227,5 @@ function(params) {
       maxUnavailable: tr.config.podDisruptionBudgetMaxUnavailable,
       selector: { matchLabels: tr.config.podLabelSelector },
     },
-  },
+  } else null,
 }

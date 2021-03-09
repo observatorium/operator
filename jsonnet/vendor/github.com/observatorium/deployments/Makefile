@@ -24,11 +24,11 @@ lint: $(JSONNET_LINT) vendor
 	echo ${JSONNET_SRC} | xargs -n 1 -- $(JSONNET_LINT) -J vendor
 
 .PHONY: generate
-generate: environments/base/manifests environments/dev/manifests
+generate: environments/base/manifests environments/dev/manifests environments/local/manifests
 
 .PHONY: validate
 validate: $(KUBEVAL) generate
-	$(KUBEVAL) --ignore-missing-schemas environments/base/manifests/*.yaml environments/dev/manifests/*.yaml tests/manifests/*.yaml
+	$(KUBEVAL) --ignore-missing-schemas environments/base/manifests/*.yaml environments/dev/manifests/*.yaml environments/local/manifests/*.yaml tests/manifests/*.yaml
 
 environments/base/manifests: environments/base/main.jsonnet vendor $(JSONNET_SRC) $(JSONNET) $(GOJSONTOYAML)
 	-make fmt
@@ -43,6 +43,13 @@ environments/dev/manifests: environments/dev/main.jsonnet vendor $(JSONNET_SRC) 
 	-mkdir environments/dev/manifests
 	$(JSONNET) -J vendor -m environments/dev/manifests environments/dev/main.jsonnet | xargs -I{} sh -c 'cat {} | $(GOJSONTOYAML) > {}.yaml' -- {}
 	find environments/dev/manifests -type f ! -name '*.yaml' -delete
+
+environments/local/manifests: environments/local/main.jsonnet vendor $(JSONNET_SRC) $(JSONNET) $(GOJSONTOYAML)
+	-make fmt
+	-rm -rf environments/local/manifests
+	-mkdir environments/local/manifests
+	$(JSONNET) -J vendor -m environments/local/manifests environments/local/main.jsonnet | xargs -I{} sh -c 'cat {} | $(GOJSONTOYAML) > {}.yaml' -- {}
+	find environments/local/manifests -type f ! -name '*.yaml' -delete
 
 tests/manifests: tests/main.jsonnet vendor generate-cert $(JSONNET_SRC) $(JSONNET) $(GOJSONTOYAML)
 	-make fmt
@@ -63,6 +70,9 @@ $(CERT_DIR):
 	mkdir -p $(CERT_DIR)
 
 # Not managed by Bingo directly, as it requires the -tags tools flag
-$(GENERATE_TLS_CERT):
+# TODO(bwplotka): Fix with https://github.com/bwplotka/bingo/issues/46.
+$(GENERATE_TLS_CERT): $(BINGO_DIR)/api.mod
+	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
 	@echo "(re)installing $(GOBIN)/generate-tls-cert"
-	@cd .bingo && $(GO) build -modfile=generate-tls-cert.mod -tags tools -o=$(GOBIN)/generate-tls-cert "github.com/observatorium/observatorium/test/tls"
+	@cd $(BINGO_DIR) && $(GO) build -mod=mod -modfile=api.mod -tags=tools -o=$(BIN_DIR)/generate-tls-cert "github.com/observatorium/observatorium/test/tls"
+

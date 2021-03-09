@@ -5,7 +5,6 @@ local receive = import 'kube-thanos/kube-thanos-receive.libsonnet';
 // When calling the function to generate the component's manifest,
 // you can pass an object structured like the default to overwrite default values.
 local defaults = receiveConfigDefaults {
-  local defaults = self,
   hashrings: [{
     hashring: 'default',
     tenants: [],
@@ -20,36 +19,88 @@ function(params)
   assert std.isArray(config.hashrings) : 'thanos receive hashrings has to be an array';
 
   { config:: config } + {
-    [h.hashring]: receive(config {
-      name+: '-' + h.hashring,
-      commonLabels+:: {
-        'controller.receive.thanos.io/hashring': h.hashring,
+    local allHashrings = self,
+
+    serviceAccount: {
+      apiVersion: 'v1',
+      kind: 'ServiceAccount',
+      metadata: {
+        name: config.name,
+        namespace: config.namespace,
+        labels: config.commonLabels,
       },
-    }) {
-      local receiver = self,
-      podDisruptionBudget:: {},  // hide this object, we don't want it
-      statefulSet+: {
-        metadata+: {
-          labels+: {
-            'controller.receive.thanos.io': 'thanos-receive-controller',
-          },
+    },
+    hashrings: {
+      [h.hashring]: receive(config {
+        name+: '-' + h.hashring,
+        commonLabels+:: {
+          'controller.receive.thanos.io/hashring': h.hashring,
         },
-        spec+: {
-          template+: {
-            spec+: {
-              containers: [
-                if c.name == 'thanos-receive' then c {
-                  env+: if std.objectHas(receiver.config, 'debug') && receiver.config.debug != '' then [
-                    { name: 'DEBUG', value: receiver.config.debug },
-                  ] else [],
-                }
-                else c
-                for c in super.containers
-              ],
+      }) {
+        local receiver = self,
+
+        serviceAccount: null,  // one service account for all receivers
+        serviceMonitor: null,  // one service monitor for all receivers
+
+        statefulSet+: {
+          metadata+: {
+            labels+: {
+              'controller.receive.thanos.io': 'thanos-receive-controller',
+            },
+          },
+          spec+: {
+            template+: {
+              spec+: {
+                serviceAccountName: allHashrings.serviceAccount.metadata.name,
+                containers: [
+                  if c.name == 'thanos-receive' then c {
+                    env+: if std.objectHas(receiver.config, 'debug') && receiver.config.debug != '' then [
+                      { name: 'DEBUG', value: receiver.config.debug },
+                    ] else [],
+                  }
+                  else c
+                  for c in super.containers
+                ],
+              },
             },
           },
         },
+      }
+      for h in config.hashrings
+    },
+  } + {
+    serviceMonitor: if config.serviceMonitor == true then {
+      apiVersion: 'monitoring.coreos.com/v1',
+      kind: 'ServiceMonitor',
+      metadata+: {
+        name: config.name,
+        namespace: config.namespace,
+        labels: config.commonLabels,
       },
-    }
-    for h in config.hashrings
+      spec: {
+        selector: {
+          matchLabels: {
+            [key]: config.podLabelSelector[key]
+            for key in std.objectFields(config.podLabelSelector)
+            if key != 'app.kubernetes.io/instance'
+          },
+        },
+        endpoints: [
+          {
+            port: 'http',
+            relabelings: [
+              {
+                sourceLabels: ['namespace', 'pod'],
+                separator: '/',
+                targetLabel: 'instance',
+              },
+              {
+                sourceLabels: ['__meta_kubernetes_service_label_controller_receive_thanos_io_shard'],
+                targetLabel: 'hashring',
+              },
+            ],
+          },
+        ],
+      },
+    },
   }
