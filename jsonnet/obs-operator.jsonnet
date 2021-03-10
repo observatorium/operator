@@ -71,6 +71,7 @@ local operatorObs = obs {
     image: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'image') then cr.spec.api.image else obs.api.config.image,
     version: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'version') then cr.spec.api.version else obs.api.config.version,
     replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else obs.api.config.replicas,
+    resources: if std.objectHas(cr.spec.api, 'resources') then cr.spec.api.resources else obs.api.config.resources,
     tls: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tls') then cr.spec.api.tls else obs.api.config.tls,
     rbac: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'rbac') then cr.spec.api.rbac else obs.api.config.rbac,
     tenants: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tenants') then { tenants: cr.spec.api.tenants } else obs.api.config.tenants,
@@ -111,6 +112,32 @@ local operatorObs = obs {
         template+: {
           spec+:{
             tolerations: obs.config.tolerations,
+          },
+        },
+      } else {}
+    ) + (
+      if (std.objectHas(cr.spec.store.cache, 'exporterResources') && v.kind == 'StatefulSet' && v.metadata.name == obs.config.name + '-thanos-store-memcached') then {
+        template+: {
+          spec+:{
+            containers: [
+              if c.name == 'exporter' then c {
+                resources: cr.spec.store.cache.exporterResources,
+              } else c
+              for c in super.containers
+            ],
+          },
+        },
+      } else {}
+    ) + (
+      if (std.objectHas(cr.spec.rule, 'reloaderResources') && (v.kind == 'StatefulSet') && v.metadata.name == obs.config.name + '-thanos-rule') then {
+        template+: {
+          spec+:{
+            containers: [
+              if c.name == 'configmap-reloader' then c {
+                resources: cr.spec.rule.reloaderResources,
+              } else c
+              for c in super.containers
+            ],
           },
         },
       } else {}
