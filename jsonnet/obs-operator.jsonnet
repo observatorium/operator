@@ -34,10 +34,19 @@ local operatorObs = obs {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.stores.config.securityContext,
     } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
-    storeCache+:: {
+    storeCache+:: (if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {}) + {
       memoryLimitMb: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'memoryLimitMb') then cr.spec.store.cache.memoryLimitMb else obs.thanos.storeCache.config.memoryLimitMb,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.storeCache.config.securityContext,
-    } + if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {},
+      resources+: (
+        if std.objectHas(cr.spec.store.cache, 'resources') then {
+          memcached: cr.spec.store.cache.resources
+        } else {}
+      ) + (
+        if std.objectHas(cr.spec.store.cache, 'exporterResources') then {
+          exporter: cr.spec.store.cache.exporterResources
+        } else {}
+      ),
+    },
 
     query+:: {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.query.config.securityContext,
@@ -112,19 +121,6 @@ local operatorObs = obs {
         template+: {
           spec+:{
             tolerations: obs.config.tolerations,
-          },
-        },
-      } else {}
-    ) + (
-      if (std.objectHas(cr.spec.store.cache, 'exporterResources') && v.kind == 'StatefulSet' && v.metadata.name == obs.config.name + '-thanos-store-memcached') then {
-        template+: {
-          spec+:{
-            containers: [
-              if c.name == 'exporter' then c {
-                resources: cr.spec.store.cache.exporterResources,
-              } else c
-              for c in super.containers
-            ],
           },
         },
       } else {}
