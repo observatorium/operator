@@ -16,7 +16,7 @@ local operatorObs = obs {
       logLevel: 'info',
     }),
 
-    thanosReceiveController:: receiveController(obs.thanos.receiveController.config {
+    receiveController:: receiveController(obs.thanos.receiveController.config {
       image: if std.objectHas(cr.spec, 'thanosReceiveController') && std.objectHas(cr.spec.thanosReceiveController, 'image') then cr.spec.thanosReceiveController.image else obs.thanos.receiveController.config.image,
       version: if std.objectHas(cr.spec, 'thanosReceiveController') && std.objectHas(cr.spec.thanosReceiveController, 'version') then cr.spec.thanosReceiveController.version else obs.thanos.receiveController.config.version,
       hashrings: cr.spec.hashrings,
