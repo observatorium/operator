@@ -40,9 +40,9 @@ local operatorObs = obs {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
     }),
 
-    store:: thanos.storeShards(obs.thanos.store.config {
-      image: if std.objectHas(cr.spec.store, 'image') then cr.spec.store.image else obs.thanos.store.config.image,
-      version: if std.objectHas(cr.spec.store, 'version') then cr.spec.store.version else obs.thanos.store.config.version,
+    stores:: thanos.storeShards(obs.thanos.stores.config {
+      image: if std.objectHas(cr.spec.store, 'image') then cr.spec.store.image else obs.thanos.stores.config.image,
+      version: if std.objectHas(cr.spec.store, 'version') then cr.spec.store.version else obs.thanos.stores.config.version,
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
     }),
