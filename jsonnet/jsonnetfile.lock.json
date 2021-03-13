@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "7308b755f0268149fa4ad229578be62bc0621e03",
-      "sum": "EFQgZVWb20UicqTfszelNoRKs6iM10dWmfXtKoPK8jM="
+      "version": "875ad386e9921e811c3a1b67fd6168e51591dc89",
+      "sum": "aKj9YlkFkGi0iZ/1rmPByuuFL27IMnrNk0oyER9oi4w="
     },
     {
       "source": {
@@ -18,8 +18,8 @@
           "subdir": "jsonnet/lib"
         }
       },
-      "version": "995fd5ef2d7917958efc89c3a77f7df99257807b",
-      "sum": "c5285lQaI1sliSbGN+AdbF9OX2dI2a1nBLyN9/AH9xw=",
+      "version": "937be40bc3199cc43ba0bcb2f5c2b8cc5b21cb0f",
+      "sum": "Z86CgnoTybhpdQKWc2ptURmps1d9Qxhec0/IK6v71kY=",
       "name": "observatorium"
     },
     {
@@ -51,8 +51,8 @@
           "subdir": "jsonnet/kube-thanos"
         }
       },
-      "version": "32a21ed67af756aab0926142b2622e198e2e1733",
-      "sum": "rcWL3R14qu1E59jGYUdPmnnCuJyXhAmmxI7GUB7BWb0="
+      "version": "a7188c678cb65d0ac1e25450af8248b226879711",
+      "sum": "9CM/l/jXalw7vc6YZMDOB6aDEdVRGFNm0SCvdKPXOww="
     }
   ],
   "legacyImports": false
