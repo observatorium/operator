@@ -7,7 +7,8 @@ local obs = (import 'github.com/observatorium/deployments/components/observatori
 local operatorObs = obs {
 
   thanos+:: thanos({
-
+    name: cr.metadata.name,
+    namespace: cr.metadata.namespace,
     compact+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
@@ -41,6 +42,9 @@ local operatorObs = obs {
   }),
 
   loki:: if std.objectHas(cr.spec, 'loki') then loki(obs.loki.config {
+      local cfg = self,
+      name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
+      namespace: cr.metadata.namespace,
       image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
       replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
       version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
@@ -50,6 +54,9 @@ local operatorObs = obs {
   gubernator:: {},
 
   api:: api(obs.api.config {
+    local cfg = self,
+    name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
+    namespace: cr.metadata.namespace,
     image: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'image') then cr.spec.api.image else obs.api.config.image,
     version: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'version') then cr.spec.api.version else obs.api.config.version,
     replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else obs.api.config.replicas,
