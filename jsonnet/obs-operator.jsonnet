@@ -1,79 +1,50 @@
 local cr = import 'generic-operator/config';
-local loki = import 'github.com/observatorium/deployments/components/loki.libsonnet';
-local memcached = import 'github.com/observatorium/deployments/components/memcached.libsonnet';
-local api = import 'github.com/observatorium/observatorium/jsonnet/lib/observatorium-api.libsonnet';
-local receiveController = import 'github.com/observatorium/thanos-receive-controller/jsonnet/lib/thanos-receive-controller.libsonnet';
-local thanos = import 'github.com/thanos-io/kube-thanos/jsonnet/kube-thanos/thanos.libsonnet';
+local thanos = (import 'github.com/observatorium/deployments/components/thanos.libsonnet');
+local loki = (import 'github.com/observatorium/deployments/components/loki.libsonnet');
+local api = (import 'github.com/observatorium/observatorium/jsonnet/lib/observatorium-api.libsonnet');
 local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
 
 local operatorObs = obs {
-  thanos+:: {
-    compact:: thanos.compact(obs.thanos.compact.config {
-      image: if std.objectHas(cr.spec.compact, 'image') then cr.spec.compact.image else obs.thanos.compact.config.image,
-      version: if std.objectHas(cr.spec.compact, 'version') then cr.spec.compact.version else obs.thanos.compact.config.version,
-      replicas: if std.objectHas(cr.spec.compact, 'replicas') then cr.spec.compact.replicas else obs.thanos.compact.config.replicas,
+
+  thanos+:: thanos({
+    name: cr.metadata.name,
+    namespace: cr.metadata.namespace,
+    compact+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
-    }),
+      disableDownsampling: if std.objectHas(cr.spec, 'compact') && std.objectHas(cr.spec.compact, 'enableDownsampling') then !cr.spec.compact.enableDownsampling else obs.thanos.compact.config.disableDownsampling,
+    } + if std.objectHas(cr.spec, 'compact') then cr.spec.compact else {},
 
-    receiveController:: receiveController(obs.thanos.receiveController.config {
-      image: if std.objectHas(cr.spec, 'thanosReceiveController') && std.objectHas(cr.spec.thanosReceiveController, 'image') then cr.spec.thanosReceiveController.image else obs.thanos.receiveController.config.image,
-      version: if std.objectHas(cr.spec, 'thanosReceiveController') && std.objectHas(cr.spec.thanosReceiveController, 'version') then cr.spec.thanosReceiveController.version else obs.thanos.receiveController.config.version,
+    receiveController+:: {
       hashrings: cr.spec.hashrings,
-    }),
+    } + if std.objectHas(cr.spec, 'thanosReceiveController') then cr.spec.thanosReceiveController else {},
 
-    receivers:: thanos.receiveHashrings(obs.thanos.receivers.config {
+    receivers+:: {
       hashrings: cr.spec.hashrings,
-      image: if std.objectHas(cr.spec.receivers, 'image') then cr.spec.receivers.image else obs.thanos.receivers.config.image,
-      version: if std.objectHas(cr.spec.receivers, 'version') then cr.spec.receivers.version else obs.thanos.receivers.config.version,
-      replicas: if std.objectHas(cr.spec.receivers, 'replicas') then cr.spec.receivers.replicas else obs.thanos.receivers.config.replicas,
-      replicationFactor: if std.objectHas(cr.spec.receivers, 'replicationFactor') then cr.spec.receivers.replicationFactor else obs.thanos.receivers.config.replicationFactor,
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
-      logLevel: 'info',
-      debug: '',
-    }),
+    } + if std.objectHas(cr.spec, 'receivers') then cr.spec.receivers else {},
 
-    rule:: thanos.rule(obs.thanos.rule.config {
-      image: if std.objectHas(cr.spec.rule, 'image') then cr.spec.rule.image else obs.thanos.rule.config.image,
-      version: if std.objectHas(cr.spec.rule, 'version') then cr.spec.rule.version else obs.thanos.rule.config.version,
-      replicas: if std.objectHas(cr.spec.rule, 'replicas') then cr.spec.rule.replicas else obs.thanos.rule.config.replicas,
+    rule+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
-    }),
+    } + if std.objectHas(cr.spec, 'rule') then cr.spec.rule else {},
 
-    stores:: thanos.storeShards(obs.thanos.stores.config {
-      image: if std.objectHas(cr.spec.store, 'image') then cr.spec.store.image else obs.thanos.stores.config.image,
-      version: if std.objectHas(cr.spec.store, 'version') then cr.spec.store.version else obs.thanos.stores.config.version,
+    stores+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
-      logLevel: 'info',
-    }),
+    } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
-    storeCache:: memcached(obs.thanos.storeCache.config {
-      image: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'image') then cr.spec.store.cache.image else obs.thanos.storeCache.config.image,
-      version: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'version') then cr.spec.store.cache.version else obs.thanos.storeCache.config.version,
-      exporterImage: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'exporterImage') then cr.spec.store.cache.exporterImage else obs.thanos.storeCache.config.exporterImage,
-      exporterVersion: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'exporterVersion') then cr.spec.store.cache.exporterVersion else obs.thanos.storeCache.config.exporterVersion,
-      replicas: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'replicas') then cr.spec.store.cache.replicas else obs.thanos.storeCache.config.replicas,
+    storeCache+:: {
       memoryLimitMb: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'memoryLimitMb') then cr.spec.store.cache.memoryLimitMb else obs.thanos.storeCache.config.memoryLimitMb,
-    }),
+    } + if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {},
 
-    query:: thanos.query(obs.thanos.query.config {
-      image: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'image') then cr.spec.query.image else obs.thanos.config.image,
-      version: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'version') then cr.spec.query.version else obs.thanos.config.version,
-      replicas: if std.objectHas(cr.spec, 'query') && std.objectHas(cr.spec.query, 'replicas') then cr.spec.query.replicas else obs.thanos.config.replicas,
-    }),
+    query+:: if std.objectHas(cr.spec, 'query') then cr.spec.query else {},
 
-    queryFrontend:: thanos.queryFrontend(obs.thanos.queryFrontend.config {
-      image: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'image') then cr.spec.queryFrontend.image else obs.thanos.queryFrontend.config.image,
-      version: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'version') then cr.spec.queryFrontend.version else obs.thanos.queryFrontend.config.version,
-      replicas: if std.objectHas(cr.spec, 'queryFrontend') && std.objectHas(cr.spec.queryFrontend, 'replicas') then cr.spec.queryFrontend.replicas else obs.thanos.queryFrontend.config.replicas,
-      queryRangeCache: {},
-      labelsCache: {},
-    }),
-
-    queryFrontendCache:: {},
-  },
+    queryFrontend+:: if std.objectHas(cr.spec, 'queryFrontend') then cr.spec.queryFrontend else {},
+  }),
 
   loki:: if std.objectHas(cr.spec, 'loki') then loki(obs.loki.config {
+      local cfg = self,
+      name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
+      namespace: cr.metadata.namespace,
       image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
       replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
       version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
@@ -82,13 +53,10 @@ local operatorObs = obs {
 
   gubernator:: {},
 
-  // TODO(kakkoyun): This should be removed.
-  apiQuery:: api(obs.api.config {
-    image: if std.objectHas(cr.spec, 'apiQuery') && std.objectHas(cr.spec.apiQuery, 'image') then cr.spec.apiQuery.image else obs.api.config.image,
-    version: if std.objectHas(cr.spec, 'apiQuery') && std.objectHas(cr.spec.apiQuery, 'version') then cr.spec.apiQuery.version else obs.api.config.version,
-  }),
-
   api:: api(obs.api.config {
+    local cfg = self,
+    name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
+    namespace: cr.metadata.namespace,
     image: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'image') then cr.spec.api.image else obs.api.config.image,
     version: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'version') then cr.spec.api.version else obs.api.config.version,
     replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else obs.api.config.replicas,
