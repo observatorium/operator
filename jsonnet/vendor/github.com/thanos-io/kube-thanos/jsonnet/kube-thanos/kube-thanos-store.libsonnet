@@ -25,6 +25,7 @@ function(params) {
   assert std.isObject(ts.config.resources),
   assert std.isBoolean(ts.config.serviceMonitor),
   assert std.isObject(ts.config.volumeClaimTemplate),
+  assert !std.objectHas(ts.config.volumeClaimTemplate, 'spec') || std.assertEqual(ts.config.volumeClaimTemplate.spec.accessModes, ['ReadWriteOnce']) : 'thanos store PVC accessMode can only be ReadWriteOnce',
 
   service: {
     apiVersion: 'v1',
@@ -89,9 +90,6 @@ function(params) {
           ),
         ] else []
       ),
-      securityContext: {
-        runAsUser: 65534,
-      },
       env: [
         { name: 'OBJSTORE_CONFIG', valueFrom: { secretKeyRef: {
           key: ts.config.objectStorageConfig.key,
@@ -139,9 +137,7 @@ function(params) {
           },
           spec: {
             serviceAccountName: ts.serviceAccount.metadata.name,
-            securityContext: {
-              fsGroup: 65534,
-            },
+            securityContext: ts.config.securityContext,
             containers: [c],
             volumes: [],
             terminationGracePeriodSeconds: 120,

@@ -11,6 +11,7 @@ function(params) {
   assert std.isObject(tr.config.resources),
   assert std.isBoolean(tr.config.serviceMonitor),
   assert std.isObject(tr.config.volumeClaimTemplate),
+  assert !std.objectHas(tr.config.volumeClaimTemplate, 'spec') || std.assertEqual(tr.config.volumeClaimTemplate.spec.accessModes, ['ReadWriteOnce']) : 'thanos receive PVC accessMode can only be ReadWriteOnce',
 
   service: {
     apiVersion: 'v1',
@@ -86,9 +87,6 @@ function(params) {
           ),
         ] else []
       ),
-      securityContext: {
-        runAsUser: 65534,
-      },
       env: [
         { name: 'NAME', valueFrom: { fieldRef: { fieldPath: 'metadata.name' } } },
         { name: 'NAMESPACE', valueFrom: { fieldRef: { fieldPath: 'metadata.namespace' } } },
@@ -142,9 +140,7 @@ function(params) {
           },
           spec: {
             serviceAccountName: tr.serviceAccount.metadata.name,
-            securityContext: {
-              fsGroup: 65534,
-            },
+            securityContext: tr.config.securityContext,
             containers: [c],
             volumes: if tr.config.hashringConfigMapName != '' then [{
               name: 'hashring-config',

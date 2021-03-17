@@ -54,6 +54,9 @@ type ObservatoriumSpec struct {
 	// Tolerations causes all components to tolerate specified taints.
 	// +optional
 	Tolerations []v1.Toleration `json:"tolerations,omitempty"`
+	// Security options the pod should run with.
+	// +optional
+	SecurityContext *v1.SecurityContext `json:"securityContext,omitempty"`
 }
 
 type ObjectStorageConfig struct {
