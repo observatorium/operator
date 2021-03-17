@@ -13,32 +13,46 @@ local operatorObs = obs {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
       disableDownsampling: if std.objectHas(cr.spec, 'compact') && std.objectHas(cr.spec.compact, 'enableDownsampling') then !cr.spec.compact.enableDownsampling else obs.thanos.compact.config.disableDownsampling,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.compact.config.securityContext,
     } + if std.objectHas(cr.spec, 'compact') then cr.spec.compact else {},
 
     receiveController+:: {
       hashrings: cr.spec.hashrings,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.receiveController.config.securityContext,
     } + if std.objectHas(cr.spec, 'thanosReceiveController') then cr.spec.thanosReceiveController else {},
 
     receivers+:: {
       hashrings: cr.spec.hashrings,
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.receivers.config.securityContext,
     } + if std.objectHas(cr.spec, 'receivers') then cr.spec.receivers else {},
 
     rule+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.rule.config.securityContext,
     } + if std.objectHas(cr.spec, 'rule') then cr.spec.rule else {},
 
     stores+:: {
       objectStorageConfig: cr.spec.objectStorageConfig.thanos,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.stores.config.securityContext,
     } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
     storeCache+:: {
       memoryLimitMb: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'memoryLimitMb') then cr.spec.store.cache.memoryLimitMb else obs.thanos.storeCache.config.memoryLimitMb,
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.storeCache.config.securityContext,
     } + if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {},
 
-    query+:: if std.objectHas(cr.spec, 'query') then cr.spec.query else {},
+    query+:: {
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.query.config.securityContext,
+    } + if std.objectHas(cr.spec, 'query') then cr.spec.query else {},
 
-    queryFrontend+:: if std.objectHas(cr.spec, 'queryFrontend') then cr.spec.queryFrontend else {},
+    queryFrontend+:: {
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.queryFrontend.config.securityContext,
+    } + if std.objectHas(cr.spec, 'queryFrontend') then cr.spec.queryFrontend else {},
+
+    queryFrontendCache+:: {
+      securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.queryFrontendCache.config.securityContext,
+    }
   }),
 
   loki:: if std.objectHas(cr.spec, 'loki') then loki(obs.loki.config {
