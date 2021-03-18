@@ -34,10 +34,19 @@ local operatorObs = obs {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.stores.config.securityContext,
     } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
-    storeCache+:: {
+    storeCache+:: (if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {}) + {
       memoryLimitMb: if std.objectHas(cr.spec.store, 'cache') && std.objectHas(cr.spec.store.cache, 'memoryLimitMb') then cr.spec.store.cache.memoryLimitMb else obs.thanos.storeCache.config.memoryLimitMb,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.storeCache.config.securityContext,
-    } + if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {},
+      resources+: (
+        if std.objectHas(cr.spec.store.cache, 'resources') then {
+          memcached: cr.spec.store.cache.resources
+        } else {}
+      ) + (
+        if std.objectHas(cr.spec.store.cache, 'exporterResources') then {
+          exporter: cr.spec.store.cache.exporterResources
+        } else {}
+      ),
+    },
 
     query+:: {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.query.config.securityContext,
@@ -71,6 +80,7 @@ local operatorObs = obs {
     image: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'image') then cr.spec.api.image else obs.api.config.image,
     version: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'version') then cr.spec.api.version else obs.api.config.version,
     replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else obs.api.config.replicas,
+    resources: if std.objectHas(cr.spec.api, 'resources') then cr.spec.api.resources else obs.api.config.resources,
     tls: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tls') then cr.spec.api.tls else obs.api.config.tls,
     rbac: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'rbac') then cr.spec.api.rbac else obs.api.config.rbac,
     tenants: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tenants') then { tenants: cr.spec.api.tenants } else obs.api.config.tenants,
@@ -111,6 +121,19 @@ local operatorObs = obs {
         template+: {
           spec+:{
             tolerations: obs.config.tolerations,
+          },
+        },
+      } else {}
+    ) + (
+      if (std.objectHas(cr.spec.rule, 'reloaderResources') && (v.kind == 'StatefulSet') && v.metadata.name == obs.config.name + '-thanos-rule') then {
+        template+: {
+          spec+:{
+            containers: [
+              if c.name == 'configmap-reloader' then c {
+                resources: cr.spec.rule.reloaderResources,
+              } else c
+              for c in super.containers
+            ],
           },
         },
       } else {}
