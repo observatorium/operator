@@ -9,8 +9,9 @@ local operatorObs = obs {
   thanos+:: thanos({
     name: cr.metadata.name,
     namespace: cr.metadata.namespace,
+    objectStorageConfig: cr.spec.objectStorageConfig.thanos,
+    hashrings: cr.spec.hashrings,
     compact+:: {
-      objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       logLevel: 'info',
       disableDownsampling: if std.objectHas(cr.spec, 'compact') && std.objectHas(cr.spec.compact, 'enableDownsampling') then !cr.spec.compact.enableDownsampling else obs.thanos.compact.config.disableDownsampling,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.compact.config.securityContext,
@@ -22,18 +23,14 @@ local operatorObs = obs {
     } + if std.objectHas(cr.spec, 'thanosReceiveController') then cr.spec.thanosReceiveController else {},
 
     receivers+:: {
-      hashrings: cr.spec.hashrings,
-      objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.receivers.config.securityContext,
     } + if std.objectHas(cr.spec, 'receivers') then cr.spec.receivers else {},
 
     rule+:: {
-      objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.rule.config.securityContext,
     } + if std.objectHas(cr.spec, 'rule') then cr.spec.rule else {},
 
     stores+:: {
-      objectStorageConfig: cr.spec.objectStorageConfig.thanos,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.stores.config.securityContext,
     } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
