@@ -18,6 +18,8 @@ package v1alpha1
 import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/brancz/locutus/feedback"
 )
 
 // ObservatoriumSpec defines the desired state of Observatorium
@@ -379,6 +381,10 @@ type LokiSpec struct {
 type ObservatoriumStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Represents the status of Observatorium
+	// +optional
+	Conditions []*feedback.StatusCondition `json:"conditions"`
 }
 
 // Observatorium is the Schema for the observatoria API

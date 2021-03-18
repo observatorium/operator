@@ -1596,6 +1596,24 @@ spec:
             type: object
           status:
             description: ObservatoriumStatus defines the observed state of Observatorium
+            properties:
+              conditions:
+                description: Represents the status of Observatorium
+                items:
+                  properties:
+                    currentStatus:
+                      type: string
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - currentStatus
+                  - lastTransitionTime
+                  - name
+                  type: object
+                type: array
             type: object
         type: object
     served: true
