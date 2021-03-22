@@ -23,7 +23,7 @@ spec:
         image: quay.io/observatorium/observatorium-operator:latest
         imagePullPolicy: IfNotPresent
         args:
-          - "--log-level=debug"
+          - "--log-level=error"
         resources:
           limits:
             cpu: 100m
