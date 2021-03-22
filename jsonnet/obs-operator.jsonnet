@@ -73,18 +73,43 @@ local operatorObs = obs {
 
   gubernator:: {},
 
-  api:: api(obs.api.config {
+  api:: api(obs.api.config + (
+    if std.objectHas(cr.spec, 'api') then cr.spec.api else {}
+  ) + {
     local cfg = self,
     name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
     namespace: cr.metadata.namespace,
-    image: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'image') then cr.spec.api.image else obs.api.config.image,
-    version: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'version') then cr.spec.api.version else obs.api.config.version,
-    replicas: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'replicas') then cr.spec.api.replicas else obs.api.config.replicas,
-    resources: if std.objectHas(cr.spec.api, 'resources') then cr.spec.api.resources else obs.api.config.resources,
-    tls: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tls') then cr.spec.api.tls else obs.api.config.tls,
-    rbac: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'rbac') then cr.spec.api.rbac else obs.api.config.rbac,
     tenants: if std.objectHas(cr.spec, 'api') && std.objectHas(cr.spec.api, 'tenants') then { tenants: cr.spec.api.tenants } else obs.api.config.tenants,
     rateLimiter: {},
+    metrics: {
+      readEndpoint: 'http://%s.%s.svc.cluster.local:%d' % [
+        operatorObs.thanos.queryFrontend.service.metadata.name,
+        operatorObs.thanos.queryFrontend.service.metadata.namespace,
+        operatorObs.thanos.queryFrontend.service.spec.ports[0].port,
+      ],
+      writeEndpoint: 'http://%s.%s.svc.cluster.local:%d' % [
+        operatorObs.thanos.receiversService.metadata.name,
+        operatorObs.thanos.receiversService.metadata.namespace,
+        operatorObs.thanos.receiversService.spec.ports[2].port,
+      ],
+    },
+    logs: if std.objectHas(cr.spec, 'loki') then {
+      readEndpoint: 'http://%s.%s.svc.cluster.local:%d' % [
+        operatorObs.loki.manifests['query-frontend-http-service'].metadata.name,
+        operatorObs.loki.manifests['query-frontend-http-service'].metadata.namespace,
+        operatorObs.loki.manifests['query-frontend-http-service'].spec.ports[0].port,
+      ],
+      tailEndpoint: 'http://%s.%s.svc.cluster.local:%d' % [
+        operatorObs.loki.manifests['querier-http-service'].metadata.name,
+        operatorObs.loki.manifests['querier-http-service'].metadata.namespace,
+        operatorObs.loki.manifests['querier-http-service'].spec.ports[0].port,
+      ],
+      writeEndpoint: 'http://%s.%s.svc.cluster.local:%d' % [
+        operatorObs.loki.manifests['distributor-http-service'].metadata.name,
+        operatorObs.loki.manifests['distributor-http-service'].metadata.namespace,
+        operatorObs.loki.manifests['distributor-http-service'].spec.ports[0].port,
+      ],
+    } else {},
   }),
 };
 
