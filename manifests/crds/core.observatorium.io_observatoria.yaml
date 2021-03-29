@@ -501,9 +501,15 @@ spec:
                         oidc:
                           description: TenantOIDC represents the OIDC configuration for an Observatorium API tenant.
                           properties:
+                            caKey:
+                              type: string
                             clientID:
                               type: string
                             clientSecret:
+                              type: string
+                            configMapName:
+                              type: string
+                            issuerCAPath:
                               type: string
                             issuerURL:
                               type: string

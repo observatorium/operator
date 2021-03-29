@@ -222,6 +222,9 @@ type TenantOIDC struct {
 	IssuerURL     string `json:"issuerURL"`
 	RedirectURL   string `json:"redirectURL,omitempty"`
 	UsernameClaim string `json:"usernameClaim,omitempty"`
+	CAKey         string `json:"caKey,omitempty"`
+	ConfigMapName string `json:"configMapName,omitempty"`
+	IssuerCAPath  string `json:"issuerCAPath,omitempty"`
 }
 
 // TenantMTLS represents the mTLS configuration for an Observatorium API tenant.
