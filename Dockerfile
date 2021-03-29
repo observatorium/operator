@@ -1,6 +1,5 @@
 # Build the manager binary
-FROM golang:1.13.3-alpine3.10 as builder
-# TODO(kakkoyun): Upgrade Go version.
+FROM golang:1.14-alpine as builder
 
 RUN apk add --update --no-cache git bash
 WORKDIR /workspace
@@ -16,7 +15,7 @@ FROM alpine:3.10 as runner
 
 WORKDIR /
 COPY --from=builder /workspace/operator/locutus /
-COPY --from=builder /workspace/operator/jsonnet /environments/operator
+COPY --from=builder /workspace/operator/jsonnet /
 COPY --from=builder /workspace/components/ /components/
 COPY --from=builder /workspace/operator/jsonnet/vendor/ /vendor/
 
@@ -48,4 +47,4 @@ LABEL vendor="Observatorium" \
     org.label-schema.vendor="observatorium/operator" \
     org.label-schema.version=$VERSION
 
-ENTRYPOINT ["/locutus", "--renderer=jsonnet", "--renderer.jsonnet.entrypoint=environments/operator/main.jsonnet", "--trigger=resource", "--trigger.resource.config=environments/operator/config.yaml"]
+ENTRYPOINT ["/locutus", "--renderer=jsonnet", "--renderer.jsonnet.entrypoint=main.jsonnet", "--trigger=resource", "--trigger.resource.config=config.yaml"]
