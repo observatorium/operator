@@ -1084,8 +1084,8 @@ spec:
               rule:
                 description: Thanos RulerSpec
                 properties:
-                  alertmanagersURL:
-                    description: AlertmanagersURL
+                  alertmanagersURLs:
+                    description: AlertmanagersURLs
                     items:
                       type: string
                     type: array

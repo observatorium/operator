@@ -516,8 +516,8 @@ func (in *RuleSpec) DeepCopyInto(out *RuleSpec) {
 		*out = make([]RuleConfig, len(*in))
 		copy(*out, *in)
 	}
-	if in.AlertmanagersURL != nil {
-		in, out := &in.AlertmanagersURL, &out.AlertmanagersURL
+	if in.AlertmanagersURLs != nil {
+		in, out := &in.AlertmanagersURLs, &out.AlertmanagersURLs
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
