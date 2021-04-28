@@ -16,11 +16,11 @@
       "source": {
         "git": {
           "remote": "https://github.com/observatorium/observatorium.git",
-          "subdir": "deployments"
+          "subdir": "configuration"
         }
       },
-      "version": "a66067042c0ba6e4c1e22d2ca41ee99db03dbd99",
-      "sum": "55nGPXNJbMftYxC69VlWiRpvDTtvMJMI/xGx3iaQCCQ="
+      "version": "e7649f39048d58832a6a63bab7def103a0fbe0ac",
+      "sum": "JJw7XVf0i3iBxjHrs/AgMQCVdNQgT6RlETcgVdSYUuk="
     },
     {
       "source": {

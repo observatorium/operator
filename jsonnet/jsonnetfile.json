@@ -5,7 +5,7 @@
       "source": {
         "git": {
           "remote": "https://github.com/observatorium/observatorium.git",
-          "subdir": "deployments"
+          "subdir": "configuration"
         }
       },
       "version": "move-dep"

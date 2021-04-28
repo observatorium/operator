@@ -1,8 +1,8 @@
 local cr = import 'generic-operator/config';
-local thanos = (import 'github.com/observatorium/observatorium/deployments/components/thanos.libsonnet');
-local loki = (import 'github.com/observatorium/observatorium/deployments/components/loki.libsonnet');
+local thanos = (import 'github.com/observatorium/observatorium/configuration/components/thanos.libsonnet');
+local loki = (import 'github.com/observatorium/observatorium/configuration/components/loki.libsonnet');
 local api = (import 'github.com/observatorium/api/jsonnet/lib/observatorium-api.libsonnet');
-local obs = (import 'github.com/observatorium/observatorium/deployments/components/observatorium.libsonnet');
+local obs = (import 'github.com/observatorium/observatorium/configuration/components/observatorium.libsonnet');
 
 local operatorObs = obs {
 
