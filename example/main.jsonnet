@@ -173,6 +173,6 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
     securityContext: {
       fsGroup: 65534,
       runAsUser: 65534,
-    }
+    },
   },
 }

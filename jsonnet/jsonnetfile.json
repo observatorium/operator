@@ -4,11 +4,11 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/observatorium/deployments.git",
-          "subdir": ""
+          "remote": "https://github.com/observatorium/observatorium.git",
+          "subdir": "deployments"
         }
       },
-      "version": "master"
+      "version": "move-dep"
     }
   ],
   "legacyImports": true

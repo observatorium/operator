@@ -1,8 +1,8 @@
 local cr = import 'generic-operator/config';
-local thanos = (import 'github.com/observatorium/deployments/components/thanos.libsonnet');
-local loki = (import 'github.com/observatorium/deployments/components/loki.libsonnet');
-local api = (import 'github.com/observatorium/observatorium/jsonnet/lib/observatorium-api.libsonnet');
-local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
+local thanos = (import 'github.com/observatorium/observatorium/deployments/components/thanos.libsonnet');
+local loki = (import 'github.com/observatorium/observatorium/deployments/components/loki.libsonnet');
+local api = (import 'github.com/observatorium/api/jsonnet/lib/observatorium-api.libsonnet');
+local obs = (import 'github.com/observatorium/observatorium/deployments/components/observatorium.libsonnet');
 
 local operatorObs = obs {
 
@@ -39,11 +39,11 @@ local operatorObs = obs {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.storeCache.config.securityContext,
       resources+: (
         if std.objectHas(cr.spec.store.cache, 'resources') then {
-          memcached: cr.spec.store.cache.resources
+          memcached: cr.spec.store.cache.resources,
         } else {}
       ) + (
         if std.objectHas(cr.spec.store.cache, 'exporterResources') then {
-          exporter: cr.spec.store.cache.exporterResources
+          exporter: cr.spec.store.cache.exporterResources,
         } else {}
       ),
     },
@@ -58,18 +58,18 @@ local operatorObs = obs {
 
     queryFrontendCache+:: {
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.queryFrontendCache.config.securityContext,
-    }
+    },
   }),
 
   loki:: if std.objectHas(cr.spec, 'loki') then loki(obs.loki.config {
-      local cfg = self,
-      name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
-      namespace: cr.metadata.namespace,
-      image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
-      replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
-      version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
-      objectStorageConfig: if cr.spec.objectStorageConfig.loki != null then cr.spec.objectStorageConfig.loki else obs.loki.config.objectStorageConfig,
-    }) else {},
+    local cfg = self,
+    name: cr.metadata.name + '-' + cfg.commonLabels['app.kubernetes.io/name'],
+    namespace: cr.metadata.namespace,
+    image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
+    replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
+    version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
+    objectStorageConfig: if cr.spec.objectStorageConfig.loki != null then cr.spec.objectStorageConfig.loki else obs.loki.config.objectStorageConfig,
+  }) else {},
 
   gubernator:: {},
 
@@ -144,7 +144,7 @@ local operatorObs = obs {
     ) + (
       if (std.objectHas(obs.config, 'tolerations') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
         template+: {
-          spec+:{
+          spec+: {
             tolerations: obs.config.tolerations,
           },
         },
@@ -152,7 +152,7 @@ local operatorObs = obs {
     ) + (
       if (std.objectHas(cr.spec.rule, 'reloaderResources') && (v.kind == 'StatefulSet') && v.metadata.name == obs.config.name + '-thanos-rule') then {
         template+: {
-          spec+:{
+          spec+: {
             containers: [
               if c.name == 'configmap-reloader' then c {
                 resources: cr.spec.rule.reloaderResources,
