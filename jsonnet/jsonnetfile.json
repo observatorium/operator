@@ -8,7 +8,7 @@
           "subdir": "configuration"
         }
       },
-      "version": "move-dep"
+      "version": "main"
     }
   ],
   "legacyImports": true
