@@ -5,7 +5,7 @@ RUN apk add --update --no-cache git bash
 WORKDIR /workspace
 # Copy the jsonnet source
 COPY . operator/
-COPY ./jsonnet/vendor/github.com/observatorium/deployments/components/ components/
+COPY ./jsonnet/vendor/github.com/observatorium/observatorium/configuration/components/ components/
 
 # Build
 WORKDIR /workspace/operator
