@@ -29,10 +29,11 @@ For **testing purposes** you may use [minio](https://github.com/minio/minio) as 
 
 ```shell
 kubectl create namespace observatorium-minio
-kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-secret-thanos.yaml
-kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-pvc.yaml
-kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-deployment.yaml
-kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/master/environments/dev/manifests/minio-service.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/main/configuration/examples/dev/manifests/minio-secret-thanos.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/main/configuration/examples/dev/manifests/minio-secret-loki.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/main/configuration/examples/dev/manifests/minio-pvc.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/main/configuration/examples/dev/manifests/minio-deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/deployments/main/configuration/examples/dev/manifests/minio-service.yaml
 ```
 
 ### Deployment

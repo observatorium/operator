@@ -46,9 +46,6 @@ spec:
       keyKey: key.pem
       secretName: observatorium-xyz-tls
     version: master-2020-11-02-v0.1.1-192-ge324057
-  apiQuery:
-    image: quay.io/thanos/thanos:v0.17.1
-    version: v0.17.1
   compact:
     enableDownsampling: false
     image: quay.io/thanos/thanos:v0.17.1
@@ -124,9 +121,6 @@ spec:
         resources:
           requests:
             storage: 50Gi
-  securityContext:
-    fsGroup: 65534
-    runAsUser: 65534
   store:
     cache:
       exporterImage: prom/memcached-exporter:v0.6.0
