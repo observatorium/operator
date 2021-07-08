@@ -378,6 +378,17 @@ type LokiSpec struct {
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate
 	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
+	// Compute Resources required by each component containers.
+	// +optional
+	Resources *LokiResourcesSpec `json:"resources,omitempty"`
+}
+
+type LokiResourcesSpec struct {
+	Compactor *v1.ResourceRequirements `json:"compactor,omitempty"`
+	Distributor *v1.ResourceRequirements `json:"distributor,omitempty"`
+	Ingester *v1.ResourceRequirements `json:"ingester,omitempty"`
+	Querier *v1.ResourceRequirements `json:"querier,omitempty"`
+	QueryFrontend *v1.ResourceRequirements `json:"query_frontend,omitempty"`
 }
 
 // ObservatoriumStatus defines the observed state of Observatorium

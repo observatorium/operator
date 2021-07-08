@@ -47,16 +47,16 @@ spec:
       secretName: observatorium-xyz-tls
     version: master-2020-11-02-v0.1.1-192-ge324057
   apiQuery:
-    image: quay.io/thanos/thanos:v0.17.1
-    version: v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
+    version: v0.20.1
   compact:
     enableDownsampling: false
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     replicas: 1
     retentionResolution1h: 1s
     retentionResolution5m: 1s
     retentionResolutionRaw: 14d
-    version: v0.17.1
+    version: v0.20.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -68,14 +68,50 @@ spec:
   - hashring: default
     tenants: []
   loki:
-    image: docker.io/grafana/loki:2.1.0
+    image: docker.io/grafana/loki:2.2.0
     replicas:
       compactor: 1
       distributor: 1
       ingester: 1
       querier: 1
       query_frontend: 1
-    version: 2.1.0
+    resources:
+      compactor:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      distributor:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      ingester:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      querier:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      query_frontend:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    version: 2.2.0
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -95,17 +131,17 @@ spec:
       key: thanos.yaml
       name: thanos-objectstorage
   query:
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     replicas: 1
-    version: v0.17.1
+    version: v0.20.1
   queryFrontend:
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     replicas: 1
-    version: v0.17.1
+    version: v0.20.1
   receivers:
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     replicas: 1
-    version: v0.17.1
+    version: v0.20.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -114,9 +150,9 @@ spec:
           requests:
             storage: 50Gi
   rule:
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     replicas: 1
-    version: v0.17.1
+    version: v0.20.1
     volumeClaimTemplate:
       spec:
         accessModes:
@@ -135,9 +171,9 @@ spec:
       memoryLimitMb: 1024
       replicas: 1
       version: 1.6.3-alpine
-    image: quay.io/thanos/thanos:v0.17.1
+    image: quay.io/thanos/thanos:v0.20.1
     shards: 1
-    version: v0.17.1
+    version: v0.20.1
     volumeClaimTemplate:
       spec:
         accessModes:

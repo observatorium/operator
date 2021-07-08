@@ -167,6 +167,7 @@ local dex = (import 'github.com/observatorium/deployments/components/dex.libsonn
     loki: {
       image: obs.loki.config.image,
       replicas: obs.loki.config.replicas,
+      resources: obs.loki.config.resources,
       version: obs.loki.config.version,
       volumeClaimTemplate: obs.loki.config.volumeClaimTemplate,
     },

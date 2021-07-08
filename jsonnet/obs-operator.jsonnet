@@ -68,6 +68,13 @@ local operatorObs = obs {
     image: if std.objectHas(cr.spec.loki, 'image') then cr.spec.loki.image else obs.loki.config.image,
     replicas: if std.objectHas(cr.spec.loki, 'replicas') then cr.spec.loki.replicas else obs.loki.config.replicas,
     version: if std.objectHas(cr.spec.loki, 'version') then cr.spec.loki.version else obs.loki.config.version,
+    resources: if std.objectHas(cr.spec.loki, 'resources') then {
+      compactor: if std.objectHas(cr.spec.loki.resources, 'compactor') then cr.spec.loki.resources.compactor else obs.loki.config.resources.compactor,
+      distributor: if std.objectHas(cr.spec.loki.resources, 'distributor') then cr.spec.loki.resources.distributor else obs.loki.config.resources.distributor,
+      ingester: if std.objectHas(cr.spec.loki.resources, 'ingester') then cr.spec.loki.resources.ingester else obs.loki.config.resources.ingester,
+      querier: if std.objectHas(cr.spec.loki.resources, 'querier') then cr.spec.loki.resources.querier else obs.loki.config.resources.querier,
+      query_frontend: if std.objectHas(cr.spec.loki.resources, 'query_frontend') then cr.spec.loki.resources.query_frontend else obs.loki.config.resources.query_frontend,
+      } else {},
     objectStorageConfig: if cr.spec.objectStorageConfig.loki != null then cr.spec.objectStorageConfig.loki else obs.loki.config.objectStorageConfig,
   }) else {},
 
