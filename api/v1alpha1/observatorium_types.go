@@ -310,9 +310,9 @@ type RuleSpec struct {
 	// RulesConfig configures rules from the configmaps
 	// +optional
 	RulesConfig []RuleConfig `json:"rulesConfig,omitempty"`
-	// AlertmanagersURL
+	// AlertmanagerURLs
 	// +optional
-	AlertmanagersURL []string `json:"alertmanagersURL,omitempty"`
+	AlertmanagerURLs []string `json:"alertmanagerURLs,omitempty"`
 	// ReloaderImage is an image of configmap reloader
 	// +optional
 	ReloaderImage string `json:"reloaderImage,omitempty"`
