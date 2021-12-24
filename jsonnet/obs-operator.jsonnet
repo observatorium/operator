@@ -32,9 +32,7 @@ local operatorObs = obs {
     } + if std.objectHas(cr.spec, 'rule') then cr.spec.rule else {},
 
     stores+:: {
-      local deleteDelay = if std.objectHas(cr.spec, 'compact') && std.objectHas(cr.spec.compact, 'deleteDelay') then cr.spec.compact.deleteDelay else obs.thanos.compact.config.deleteDelay,
       securityContext: if std.objectHas(cr.spec, 'securityContext') then cr.spec.securityContext else obs.thanos.stores.config.securityContext,
-      ignoreDeletionMarksDelay: std.parseInt(std.substr(deleteDelay, 0, std.length(deleteDelay)-1))/2 + std.substr(deleteDelay, std.length(deleteDelay)-1, std.length(deleteDelay)),
     } + if std.objectHas(cr.spec, 'store') then cr.spec.store else {},
 
     storeCache+:: (if std.objectHas(cr.spec, 'store') && std.objectHas(cr.spec.store, 'cache') then cr.spec.store.cache else {}) + {
