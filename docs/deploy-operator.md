@@ -41,8 +41,8 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/m
 
 You may skip this step if you are using OpenShift, in which the CRD is already available as a part of the monitoring stack.
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0prometheusruleCustomResourceDefinition.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0servicemonitorCustomResourceDefinition.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusruleCustomResourceDefinition.yaml
 ```
 
 #### RBAC Configuration
