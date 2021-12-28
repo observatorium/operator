@@ -15,11 +15,17 @@ jobs:
     steps:
       - checkout
       - run: make jsonnet-vendor
+      - run: docker pull grafana/grafana:latest
+      - run: docker pull prom/memcached-exporter:v0.6.0
+      - run: docker pull docker.io/memcached:1.6.3-alpine
+      - run: docker pull minio/minio
+      - run: docker pull grafana/loki:2.1.0
       - run:
           name: e2e tests with operator
           no_output_timeout: 30m
           command: |
             ./tests/e2e.sh kind
+            ./tests/e2e.sh load-images
             ./tests/e2e.sh deploy-operator
             ./tests/e2e.sh test --tls
             ./tests/e2e.sh delete-cr

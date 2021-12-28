@@ -15,6 +15,14 @@ kind() {
     ./kind create cluster
 }
 
+load_images() {
+    $KIND load docker-image grafana/grafana:latest
+    $KIND load docker-image prom/memcached-exporter:v0.6.0
+    $KIND load docker-image docker.io/memcached:1.6.3-alpine
+    $KIND load docker-image minio/minio
+    $KIND load docker-image grafana/loki:2.1.0
+}
+
 dex() {
     $KUBECTL create ns dex || true
     $KUBECTL apply -f jsonnet/vendor/github.com/observatorium/observatorium/configuration/tests/manifests/observatorium-xyz-tls-dex.yaml
@@ -167,6 +175,10 @@ must_gather() {
 case $1 in
 kind)
     kind
+    ;;
+
+load-images)
+    load_images
     ;;
 
 deploy)
