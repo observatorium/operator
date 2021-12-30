@@ -1,6 +1,6 @@
-local obs = (import 'github.com/observatorium/deployments/components/observatorium.libsonnet');
+local obs = (import 'github.com/observatorium/observatorium/configuration/components/observatorium.libsonnet');
 
-local dex = (import 'github.com/observatorium/deployments/components/dex.libsonnet')({
+local dex = (import 'github.com/observatorium/observatorium/configuration/components/dex.libsonnet')({
   local cfg = self,
   name: 'dex',
   namespace: 'dex',
