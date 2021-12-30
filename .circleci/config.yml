@@ -1,12 +1,12 @@
+version: 2.1
 jobs:
   build:
-    working_directory: /go/src/github.com/observatorium/operator
     docker:
-      - image: quay.io/coreos/jsonnet-ci
+      - image: cimg/go:1.17
     steps:
       - checkout
       - run: make jsonnet-vendor
-      - run: make generate manifests
+      - run: make generate manifests --always-make
       - run: git diff --exit-code
 
   test:

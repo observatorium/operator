@@ -17,7 +17,7 @@ manifests: example/manifests/observatorium.yaml manifests/crds/core.observatoriu
 manifests/crds/core.observatorium.io_observatoria.yaml: $(CONTROLLER_GEN) $(find api/v1alpha1 -type f -name '*.go')
 	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=manifests/crds
 
-example/manifests/observatorium.yaml: example/main.jsonnet
+example/manifests/observatorium.yaml: $(JSONNET) $(GOJSONTOYAML) example/main.jsonnet
 	$(JSONNET) -J jsonnet/vendor example/main.jsonnet | $(GOJSONTOYAML) > example/manifests/observatorium.yaml
 
 # Run go fmt against code
