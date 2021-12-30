@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.14-alpine as builder
+FROM golang:1.17-alpine as builder
 
 RUN apk add --update --no-cache git bash
 WORKDIR /workspace
@@ -11,7 +11,7 @@ COPY ./jsonnet/vendor/github.com/observatorium/observatorium/configuration/compo
 WORKDIR /workspace/operator
 RUN GO111MODULE="on" go build github.com/brancz/locutus
 
-FROM alpine:3.10 as runner
+FROM alpine:3.15 as runner
 
 WORKDIR /
 COPY --from=builder /workspace/operator/locutus /

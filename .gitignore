@@ -2,3 +2,4 @@
 /kubectl
 /tmp/
 jsonnet/vendor
+vendor

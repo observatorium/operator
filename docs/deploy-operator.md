@@ -7,8 +7,8 @@
 Check the following resources for more information about Observatorium:
 
 * [Documentation repository](https://github.com/observatorium/docs/)
-* [Observatorium API](https://github.com/observatorium/observatorium/)
-* [Observatorium deployments repository](https://github.com/observatorium/deployments)
+* [Observatorium API](https://github.com/observatorium/api/)
+* [Observatorium repository](https://github.com/observatorium/observatorium)
 * [Locutus - The framework which the operator is based on](https://github.com/brancz/locutus)
 
 ## How to deploy - Kubernetes and OpenShift
@@ -41,8 +41,8 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/m
 
 You may skip this step if you are using OpenShift, in which the CRD is already available as a part of the monitoring stack.
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/setup/prometheus-operator-0prometheusruleCustomResourceDefinition.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/136b818c9ac289716ad214df79968c0c8de2ef5b/manifests/setup/0servicemonitorCustomResourceDefinition.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/136b818c9ac289716ad214df79968c0c8de2ef5b/manifests/setup/0prometheusruleCustomResourceDefinition.yaml
 ```
 
 #### RBAC Configuration
