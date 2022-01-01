@@ -141,14 +141,10 @@ type StoreSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-<<<<<<< HEAD
 	// ServiceMonitor enables deploying a service monitor for the Thanos Stores.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-	// Duration after which the blocks marked for deletion will be filtered out while fetching blocks
-=======
 	// Duration after which the blocks marked for deletion will be filtered out while fetching blocks.
->>>>>>> 045aa31 (Update api/v1alpha1/observatorium_types.go)
 	// +optional
 	IgnoreDeletionMarksDelay string `json:"ignoreDeletionMarksDelay,omitempty"`
 }
@@ -375,7 +371,7 @@ type CompactSpec struct {
 	// ServiceMonitor enables deploying a service monitor for the Thanos Compactors.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-	// Time before a block marked for deletion is deleted from bucket
+	// Time before a block marked for deletion is deleted from object storage.
 	// +optional
 	DeleteDelay string `json:"deleteDelay,omitempty"`
 }
