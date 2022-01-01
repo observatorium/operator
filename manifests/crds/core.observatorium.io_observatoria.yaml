@@ -1071,7 +1071,7 @@ spec:
                 properties:
                   deleteDelay:
                     description: Time before a block marked for deletion is deleted
-                      from bucket
+                      from object storage.
                     type: string
                   enableDownsampling:
                     description: EnableDownsampling enables downsampling.
@@ -2396,7 +2396,7 @@ spec:
                     type: object
                   ignoreDeletionMarksDelay:
                     description: Duration after which the blocks marked for deletion
-                      will be filtered out while fetching blocks
+                      will be filtered out while fetching blocks.
                     type: string
                   image:
                     description: Thanos image
