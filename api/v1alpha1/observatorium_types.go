@@ -104,7 +104,7 @@ type ThanosReceiveControllerSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Receiver Controller.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -123,7 +123,7 @@ type ReceiversSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Receivers.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -141,7 +141,7 @@ type StoreSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Stores.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -166,7 +166,7 @@ type StoreCacheSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	ExporterResources v1.ResourceRequirements `json:"exporterResources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Store Caches.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -289,7 +289,7 @@ type APISpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Observatorium API.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -304,7 +304,7 @@ type QuerySpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Queriers.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -340,7 +340,7 @@ type RuleSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	ReloaderResources v1.ResourceRequirements `json:"reloaderResources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Rulers.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -365,7 +365,7 @@ type CompactSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Compactors.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -384,7 +384,7 @@ type QueryFrontendSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables deploying a service monitor for the Thanos Query Frontends.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -405,7 +405,7 @@ type LokiSpec struct {
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate
 	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
-	// ServiceMonitor enables servicemonitor.
+	// ServiceMonitor enables  deploying a service monitor for Loki.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }

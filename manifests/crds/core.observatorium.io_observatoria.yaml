@@ -981,7 +981,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Observatorium API.
                     type: boolean
                   tenants:
                     description: Tenants is a slice of tenants for the Observatorium
@@ -1114,7 +1115,8 @@ spec:
                     description: RetentionResolutionRaw
                     type: string
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Compactors.
                     type: boolean
                   version:
                     description: Version of Thanos image to be deployed.
@@ -1328,7 +1330,8 @@ spec:
                     description: Loki replicas per component
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables  deploying a service monitor
+                      for Loki.
                     type: boolean
                   version:
                     description: Version of Loki image to be deployed
@@ -1597,7 +1600,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Queriers.
                     type: boolean
                   version:
                     description: Version of Thanos image to be deployed.
@@ -1640,7 +1644,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Query Frontends.
                     type: boolean
                   version:
                     description: Version of Query Frontend image to be deployed.
@@ -1688,7 +1693,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Receivers.
                     type: boolean
                   version:
                     description: Version of Thanos image to be deployed.
@@ -1956,7 +1962,8 @@ spec:
                       type: object
                     type: array
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Rulers.
                     type: boolean
                   version:
                     description: Version of Thanos image to be deployed.
@@ -2376,7 +2383,8 @@ spec:
                             type: object
                         type: object
                       serviceMonitor:
-                        description: ServiceMonitor enables servicemonitor.
+                        description: ServiceMonitor enables deploying a service monitor
+                          for the Thanos Store Caches.
                         type: boolean
                       version:
                         description: Version of Memcached image to be deployed.
@@ -2412,7 +2420,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Stores.
                     type: boolean
                   shards:
                     format: int32
@@ -2630,7 +2639,8 @@ spec:
                         type: object
                     type: object
                   serviceMonitor:
-                    description: ServiceMonitor enables servicemonitor.
+                    description: ServiceMonitor enables deploying a service monitor
+                      for the Thanos Receiver Controller.
                     type: boolean
                   version:
                     description: Version describes the version of Thanos receive controller
