@@ -405,7 +405,7 @@ type LokiSpec struct {
 	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate
 	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
-	// ServiceMonitor enables  deploying a service monitor for Loki.
+	// ServiceMonitor enables deploying a service monitor for Loki.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
