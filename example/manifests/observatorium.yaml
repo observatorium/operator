@@ -122,6 +122,7 @@ spec:
           requests:
             storage: 50Gi
   securityContext:
+    fsGroup: 65534
     runAsUser: 65534
   store:
     cache:

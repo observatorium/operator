@@ -58,7 +58,7 @@ type ObservatoriumSpec struct {
 	Tolerations []v1.Toleration `json:"tolerations,omitempty"`
 	// Security options the pod should run with.
 	// +optional
-	SecurityContext *v1.SecurityContext `json:"securityContext,omitempty"`
+	SecurityContext *v1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
 type ObjectStorageConfig struct {
