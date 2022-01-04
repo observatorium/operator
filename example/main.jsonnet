@@ -154,11 +154,6 @@ local dex = (import 'github.com/observatorium/observatorium/configuration/compon
         caKey: 'ca.pem',
       },
     },
-    // TODO(kakkoyun): This should be removed.
-    apiQuery: {
-      image: obs.thanos.config.image,
-      version: obs.thanos.config.version,
-    },
     query: {
       image: obs.thanos.config.image,
       version: obs.thanos.config.version,

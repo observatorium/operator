@@ -18,7 +18,7 @@ jobs:
       - run: docker pull prom/memcached-exporter:v0.6.0
       - run: docker pull docker.io/memcached:1.6.3-alpine
       - run: docker pull minio/minio:RELEASE.2021-09-09T21-37-07Z
-      - run: docker pull grafana/loki:2.1.0
+      - run: docker pull grafana/loki:2.2.0
       - run:
           name: e2e tests with operator
           no_output_timeout: 30m

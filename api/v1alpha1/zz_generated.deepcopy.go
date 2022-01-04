@@ -323,7 +323,7 @@ func (in *ObservatoriumSpec) DeepCopyInto(out *ObservatoriumSpec) {
 	}
 	if in.SecurityContext != nil {
 		in, out := &in.SecurityContext, &out.SecurityContext
-		*out = new(v1.SecurityContext)
+		*out = new(v1.PodSecurityContext)
 		(*in).DeepCopyInto(*out)
 	}
 }
