@@ -37,7 +37,7 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/m
 
 #### Dex
 
-For **testing purposes** you may use [dex](https://github.com/dexidp/dex) which is an identity service for observatorium API as described below.
+For **testing purposes** you may use [dex](https://github.com/dexidp/dex) as an OIDC identity provider for the Observatorium API as described below.
 
 ```shell
 kubectl create namespace dex
