@@ -19,7 +19,7 @@ load_images() {
     $KIND load docker-image prom/memcached-exporter:v0.6.0
     $KIND load docker-image docker.io/memcached:1.6.3-alpine
     $KIND load docker-image minio/minio:RELEASE.2021-09-09T21-37-07Z
-    $KIND load docker-image grafana/loki:2.1.0
+    $KIND load docker-image grafana/loki:2.2.0
 }
 
 dex() {

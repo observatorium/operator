@@ -6,9 +6,8 @@
 
 Check the following resources for more information about Observatorium:
 
-* [Documentation repository](https://github.com/observatorium/docs/)
+* [Observatorium](https://github.com/observatorium/observatorium)
 * [Observatorium API](https://github.com/observatorium/api/)
-* [Observatorium repository](https://github.com/observatorium/observatorium)
 * [Locutus - The framework which the operator is based on](https://github.com/brancz/locutus)
 
 ## How to deploy - Kubernetes and OpenShift
@@ -25,14 +24,29 @@ kubectl create namespace observatorium
 
 #### S3 storage endpoint and secret
 
-For **testing purposes** you may use [minio](https://github.com/minio/minio) as describe below.
+For **testing purposes** you may use [minio](https://github.com/minio/minio) as described below.
 
 ```shell
 kubectl create namespace observatorium-minio
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/minio-secret-loki.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/minio-secret-thanos.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/minio-pvc.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/minio-deployment.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/minio-service.yaml
+```
+
+#### Dex
+
+For **testing purposes** you may use [dex](https://github.com/dexidp/dex) which is an identity service for observatorium API as described below.
+
+```shell
+kubectl create namespace dex
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-dex.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/dex-secret.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/dex-pvc.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/dex-deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/examples/dev/manifests/dex-service.yaml
+kubectl apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/test-ca-tls.yaml
 ```
 
 ### Deployment
@@ -55,8 +69,6 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master
 
 #### Deploy Observatorium CRD and Operator
 
-* In case you need to force a new image download (e.g. development environment), please refer to the [development section](#Development).
-
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/crds/core.observatorium.io_observatoria.yaml
 kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master/manifests/operator.yaml
@@ -66,6 +78,12 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master
 
 ```shell
 kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/operator/master/example/manifests/observatorium.yaml
+```
+
+For **testing purposes**, you may use the certificate and key as described below.
+```shell
+kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-configmap.yaml
+kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-secret.yaml
 ```
 
 Monitor the CR status and wait for status --> Finished
@@ -81,50 +99,73 @@ Finished
 ```shell
 kubectl -n observatorium get all
 
-NAME                                                              READY   STATUS    RESTARTS   AGE
-pod/observatorium-xyz-cortex-query-frontend-7bc9b64c65-f6ksx      1/1     Running   0          2m50s
-pod/observatorium-xyz-observatorium-api-c8ddc9979-b8wfz           1/1     Running   0          3m18s
-pod/observatorium-xyz-thanos-compact-0                            1/1     Running   0          2m13s
-pod/observatorium-xyz-thanos-query-69fbc7b546-wmxzk               1/1     Running   0          2m6s
-pod/observatorium-xyz-thanos-receive-controller-f89fdf5c7-jc7vd   1/1     Running   0          63s
-pod/observatorium-xyz-thanos-receive-default-0                    1/1     Running   0          60s
-pod/observatorium-xyz-thanos-receive-default-1                    1/1     Running   0          49s
-pod/observatorium-xyz-thanos-receive-default-2                    1/1     Running   0          45s
-pod/observatorium-xyz-thanos-rule-0                               1/1     Running   0          37s
-pod/observatorium-xyz-thanos-rule-1                               1/1     Running   0          25s
-pod/observatorium-xyz-thanos-store-memcached-0                    2/2     Running   0          2m28s
-pod/observatorium-xyz-thanos-store-shard-0-0                      1/1     Running   0          22s
+NAME                                                               READY   STATUS    RESTARTS   AGE
+pod/observatorium-xyz-loki-compactor-0                             1/1     Running   0          7m9s
+pod/observatorium-xyz-loki-distributor-6cb7c58978-588dz            1/1     Running   0          7m9s
+pod/observatorium-xyz-loki-ingester-0                              1/1     Running   0          7m8s
+pod/observatorium-xyz-loki-querier-0                               1/1     Running   0          7m10s
+pod/observatorium-xyz-loki-query-frontend-6f7bd65b8c-fqlzg         1/1     Running   0          7m9s
+pod/observatorium-xyz-observatorium-api-58cd494f48-p7ggc           1/1     Running   0          7m9s
+pod/observatorium-xyz-thanos-compact-0                             1/1     Running   6          7m8s
+pod/observatorium-xyz-thanos-query-85b9fcb944-h4jdl                1/1     Running   0          7m9s
+pod/observatorium-xyz-thanos-query-frontend-6749f85c69-4wtbv       1/1     Running   0          7m8s
+pod/observatorium-xyz-thanos-query-frontend-memcached-0            2/2     Running   0          7m9s
+pod/observatorium-xyz-thanos-receive-controller-796cd55b58-xlhlw   1/1     Running   0          7m8s
+pod/observatorium-xyz-thanos-receive-default-0                     1/1     Running   0          7m9s
+pod/observatorium-xyz-thanos-rule-0                                1/1     Running   0          7m9s
+pod/observatorium-xyz-thanos-store-memcached-0                     2/2     Running   0          7m9s
+pod/observatorium-xyz-thanos-store-shard-0-0                       1/1     Running   6          7m8s
 
-NAME                                                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE
-service/observatorium-xyz-cortex-query-frontend       ClusterIP   10.96.104.0     <none>        9090/TCP                        2m43s
-service/observatorium-xyz-observatorium-api           ClusterIP   10.96.233.236   <none>        8081/TCP,8080/TCP               3m5s
-service/observatorium-xyz-thanos-compact              ClusterIP   10.96.185.145   <none>        10902/TCP                       2m21s
-service/observatorium-xyz-thanos-query                ClusterIP   10.96.9.60      <none>        10901/TCP,9090/TCP              117s
-service/observatorium-xyz-thanos-receive              ClusterIP   10.96.135.197   <none>        10901/TCP,10902/TCP,19291/TCP   52s
-service/observatorium-xyz-thanos-receive-controller   ClusterIP   10.96.15.57     <none>        8080/TCP                        82s
-service/observatorium-xyz-thanos-receive-default      ClusterIP   None            <none>        10901/TCP,10902/TCP,19291/TCP   67s
-service/observatorium-xyz-thanos-rule                 ClusterIP   None            <none>        10901/TCP,10902/TCP             45s
-service/observatorium-xyz-thanos-store-memcached      ClusterIP   None            <none>        11211/TCP,9150/TCP              2m36s
-service/observatorium-xyz-thanos-store-shard-0        ClusterIP   None            <none>        10901/TCP,10902/TCP             30s
+NAME                                                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                         AGE
+service/observatorium-xyz-loki-compactor-grpc               ClusterIP   None            <none>        9095/TCP                        7m9s
+service/observatorium-xyz-loki-compactor-http               ClusterIP   10.96.111.103   <none>        3100/TCP                        7m9s
+service/observatorium-xyz-loki-distributor-grpc             ClusterIP   None            <none>        9095/TCP                        7m9s
+service/observatorium-xyz-loki-distributor-http             ClusterIP   10.96.22.42     <none>        3100/TCP                        7m9s
+service/observatorium-xyz-loki-gossip-ring                  ClusterIP   None            <none>        7946/TCP                        7m9s
+service/observatorium-xyz-loki-ingester-grpc                ClusterIP   None            <none>        9095/TCP                        7m9s
+service/observatorium-xyz-loki-ingester-http                ClusterIP   10.96.246.16    <none>        3100/TCP                        7m9s
+service/observatorium-xyz-loki-querier-grpc                 ClusterIP   None            <none>        9095/TCP                        7m9s
+service/observatorium-xyz-loki-querier-http                 ClusterIP   10.96.158.162   <none>        3100/TCP                        7m9s
+service/observatorium-xyz-loki-query-frontend-grpc          ClusterIP   None            <none>        9095/TCP                        7m9s
+service/observatorium-xyz-loki-query-frontend-http          ClusterIP   10.96.188.133   <none>        3100/TCP                        7m9s
+service/observatorium-xyz-observatorium-api                 ClusterIP   10.96.239.236   <none>        8081/TCP,8080/TCP               7m9s
+service/observatorium-xyz-thanos-compact                    ClusterIP   None            <none>        10902/TCP                       7m9s
+service/observatorium-xyz-thanos-query                      ClusterIP   10.96.18.9      <none>        10901/TCP,9090/TCP              7m9s
+service/observatorium-xyz-thanos-query-frontend             ClusterIP   10.96.14.90     <none>        9090/TCP                        7m9s
+service/observatorium-xyz-thanos-query-frontend-memcached   ClusterIP   None            <none>        11211/TCP,9150/TCP              7m9s
+service/observatorium-xyz-thanos-receive                    ClusterIP   10.96.255.25    <none>        10901/TCP,10902/TCP,19291/TCP   7m9s
+service/observatorium-xyz-thanos-receive-controller         ClusterIP   10.96.134.145   <none>        8080/TCP                        7m9s
+service/observatorium-xyz-thanos-receive-default            ClusterIP   None            <none>        10901/TCP,10902/TCP,19291/TCP   7m9s
+service/observatorium-xyz-thanos-rule                       ClusterIP   None            <none>        10901/TCP,10902/TCP,9533/TCP    7m9s
+service/observatorium-xyz-thanos-store-memcached            ClusterIP   None            <none>        11211/TCP,9150/TCP              7m9s
+service/observatorium-xyz-thanos-store-shard-0              ClusterIP   None            <none>        10901/TCP,10902/TCP             7m9s
 
 NAME                                                          READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/observatorium-xyz-cortex-query-frontend       1/1     1            1           2m51s
-deployment.apps/observatorium-xyz-observatorium-api           1/1     1            1           3m18s
-deployment.apps/observatorium-xyz-thanos-query                1/1     1            1           2m6s
-deployment.apps/observatorium-xyz-thanos-receive-controller   1/1     1            1           104s
+deployment.apps/observatorium-xyz-loki-distributor            1/1     1            1           7m9s
+deployment.apps/observatorium-xyz-loki-query-frontend         1/1     1            1           7m9s
+deployment.apps/observatorium-xyz-observatorium-api           1/1     1            1           7m9s
+deployment.apps/observatorium-xyz-thanos-query                1/1     1            1           7m10s
+deployment.apps/observatorium-xyz-thanos-query-frontend       1/1     1            1           7m9s
+deployment.apps/observatorium-xyz-thanos-receive-controller   1/1     1            1           7m9s
 
-NAME                                                                    DESIRED   CURRENT   READY   AGE
-replicaset.apps/observatorium-xyz-cortex-query-frontend-7bc9b64c65      1         1         1       2m50s
-replicaset.apps/observatorium-xyz-observatorium-api-c8ddc9979           1         1         1       3m18s
-replicaset.apps/observatorium-xyz-thanos-query-69fbc7b546               1         1         1       2m6s
-replicaset.apps/observatorium-xyz-thanos-receive-controller-f89fdf5c7   1         1         1       104s
+NAME                                                                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/observatorium-xyz-loki-distributor-6cb7c58978            1         1         1       7m9s
+replicaset.apps/observatorium-xyz-loki-query-frontend-6f7bd65b8c         1         1         1       7m9s
+replicaset.apps/observatorium-xyz-observatorium-api-58cd494f48           1         1         1       7m9s
+replicaset.apps/observatorium-xyz-thanos-query-85b9fcb944                1         1         1       7m10s
+replicaset.apps/observatorium-xyz-thanos-query-frontend-6749f85c69       1         1         1       7m9s
+replicaset.apps/observatorium-xyz-thanos-receive-controller-796cd55b58   1         1         1       7m9s
 
-NAME                                                        READY   AGE
-statefulset.apps/observatorium-xyz-thanos-compact           1/1     2m14s
-statefulset.apps/observatorium-xyz-thanos-receive-default   3/3     60s
-statefulset.apps/observatorium-xyz-thanos-rule              2/2     37s
-statefulset.apps/observatorium-xyz-thanos-store-memcached   1/1     2m28s
-statefulset.apps/observatorium-xyz-thanos-store-shard-0     1/1     23s
+NAME                                                                 READY   AGE
+statefulset.apps/observatorium-xyz-loki-compactor                    1/1     7m9s
+statefulset.apps/observatorium-xyz-loki-ingester                     1/1     7m9s
+statefulset.apps/observatorium-xyz-loki-querier                      1/1     7m10s
+statefulset.apps/observatorium-xyz-thanos-compact                    1/1     7m9s
+statefulset.apps/observatorium-xyz-thanos-query-frontend-memcached   1/1     7m9s
+statefulset.apps/observatorium-xyz-thanos-receive-default            1/1     7m9s
+statefulset.apps/observatorium-xyz-thanos-rule                       1/1     7m9s
+statefulset.apps/observatorium-xyz-thanos-store-memcached            1/1     7m9s
+statefulset.apps/observatorium-xyz-thanos-store-shard-0              1/1     7m10s
 ```
 
 ## Test
@@ -146,14 +187,15 @@ oc -n observatorium expose svc observatorium-xyz-observatorium-api --port=public
 ### (Option A) Transmit Metrics via Remote Write Client
 
 ```shell
-kubectl -n default apply -f https://raw.githubusercontent.com/observatorium/deployments/master/tests/manifests/observatorium-up-metrics.yaml
-kubectl wait --for=condition=complete --timeout=5m -n default job/observatorium-up
+kubectl -n default apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-configmap.yaml
+kubectl -n default apply -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-up-metrics-tls.yaml
+kubectl wait --for=condition=complete --timeout=5m -n default job/observatorium-up-metrics-tls
 ````
 
 Result
 
 ```shell
-job.batch/observatorium-up condition met
+job.batch/observatorium-up-metrics-tls condition met
 ```
 
 ### (Option B) Configure Prometheus Remote Write
@@ -210,12 +252,3 @@ oc -n observatorium expose svc grafana
 You should now be able to see the 'foo' metric generated by the up client you invoked beforehand.
 ![Multi Cluster Architecture](./grafana-observatorium.png)
 
-## Development
-
-* Create the operator while forcing Kubernetes / OpenShift to download the image.
-
-```shell
-curl https://raw.githubusercontent.com/observatorium/operator/master/manifests/operator.yaml | \
-sed 's/imagePullPolicy\: IfNotPresent/imagePullPolicy\: Always/g' > observatorium-operator.yaml && \
-kubectl -n default create -f observatorium-operator.yaml && rm -f observatorium-operator.yaml
-```
