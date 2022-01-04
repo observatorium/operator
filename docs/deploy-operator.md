@@ -80,7 +80,7 @@ kubectl apply -f https://raw.githubusercontent.com/observatorium/operator/master
 kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/operator/master/example/manifests/observatorium.yaml
 ```
 
-For **testing purposes**, you may use the certificate and key as described below.
+For **testing purposes**, you may use the end-to-end test certificate and key as described below.
 ```shell
 kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-configmap.yaml
 kubectl apply -n observatorium -f https://raw.githubusercontent.com/observatorium/observatorium/main/configuration/tests/manifests/observatorium-xyz-tls-secret.yaml
