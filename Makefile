@@ -6,7 +6,10 @@ BUILD_DATE := $(shell date -u +"%Y-%m-%d")
 BUILD_TIMESTAMP := $(shell date -u +"%Y-%m-%dT%H:%M:%S%Z")
 VCS_BRANCH := $(strip $(shell git rev-parse --abbrev-ref HEAD))
 VCS_REF := $(strip $(shell [ -d .git ] && git rev-parse --short HEAD))
-DOCKER_REPO ?= quay.io/observatorium/observatorium-operator
+CONTAINER_REPO ?= quay.io/observatorium/observatorium-operator
+CONTAINER_ENGINE=$(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
+CONTAINER_TAG ?= latest
+
 
 BIN_DIR ?= $(shell pwd)/tmp/bin
 CONTROLLER_GEN ?= $(BIN_DIR)/controller-gen
@@ -36,18 +39,18 @@ api/v1alpha1/zz_generated.deepcopy.go: $(CONTROLLER_GEN)
 
 # Build the docker image
 container-build:
-	docker build --build-arg BUILD_DATE="$(BUILD_TIMESTAMP)" \
+	$(CONTAINER_ENGINE) build --build-arg BUILD_DATE="$(BUILD_TIMESTAMP)" \
 		--build-arg VERSION="$(VERSION)" \
 		--build-arg VCS_REF="$(VCS_REF)" \
 		--build-arg VCS_BRANCH="$(VCS_BRANCH)" \
 		--build-arg DOCKERFILE_PATH="/Dockerfile" \
-		-t $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) .
+		-t $(CONTAINER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) .
 
 # Push the image
 container-push: container-build
-	docker tag $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) $(DOCKER_REPO):latest
-	docker push $(DOCKER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION)
-	docker push $(DOCKER_REPO):latest
+	$(CONTAINER_ENGINE) tag $(CONTAINER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION) $(CONTAINER_REPO):$(CONTAINER_TAG)
+	$(CONTAINER_ENGINE) push $(CONTAINER_REPO):$(VCS_BRANCH)-$(BUILD_DATE)-$(VERSION)
+	$(CONTAINER_ENGINE) push $(CONTAINER_REPO):$(CONTAINER_TAG)
 
 jsonnet-vendor: $(JB)
 	cd jsonnet; $(JB) install
