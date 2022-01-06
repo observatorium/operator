@@ -28,22 +28,11 @@ type ObservatoriumSpec struct {
 	ObjectStorageConfig ObjectStorageConfig `json:"objectStorageConfig"`
 	// Hashrings describes a list of Hashrings
 	Hashrings []*Hashring `json:"hashrings"`
-	// Thanos CompactSpec
-	Compact CompactSpec `json:"compact"`
-	// Thanos Receive Controller Spec
-	ThanosReceiveController ThanosReceiveControllerSpec `json:"thanosReceiveController,omitempty"`
-	// Thanos ThanosPersistentSpec
-	Receivers ReceiversSpec `json:"receivers"`
-	// Thanos QueryFrontend
-	QueryFrontend QueryFrontendSpec `json:"queryFrontend,omitempty"`
-	// Thanos StoreSpec
-	Store StoreSpec `json:"store"`
-	// Thanos RulerSpec
-	Rule RuleSpec `json:"rule"`
+	// Thanos
+	// +optional
+	Thanos ThanosSpec `json:"thanos"`
 	// API
 	API APISpec `json:"api,omitempty"`
-	// Query
-	Query QuerySpec `json:"query,omitempty"`
 	// Loki
 	// +optional
 	Loki *LokiSpec `json:"loki,omitempty"`
@@ -59,6 +48,27 @@ type ObservatoriumSpec struct {
 	// Security options the pod should run with.
 	// +optional
 	SecurityContext *v1.PodSecurityContext `json:"securityContext,omitempty"`
+}
+
+type ThanosSpec struct {
+	// Thanos image
+	Image string `json:"image,omitempty"`
+	// Version of Thanos image to be deployed.
+	Version string `json:"version,omitempty"`
+	// Thanos Compact
+	Compact CompactSpec `json:"compact"`
+	// Thanos Query
+	Query QuerySpec `json:"query,omitempty"`
+	// Thanos Query Frontend
+	QueryFrontend QueryFrontendSpec `json:"queryFrontend,omitempty"`
+	// Thanos Receive Controller
+	ReceiveController ReceiveControllerSpec `json:"receiveController,omitempty"`
+	// Thanos Thanos Receiver
+	Receivers ReceiversSpec `json:"receivers"`
+	// Thanos Ruler
+	Rule RuleSpec `json:"rule"`
+	// Thanos Store
+	Store StoreSpec `json:"store"`
 }
 
 type ObjectStorageConfig struct {
@@ -96,11 +106,7 @@ type LokiObjectStorageConfigSpec struct {
 	RegionKey string `json:"regionKey"`
 }
 
-type ThanosReceiveControllerSpec struct {
-	// Receive Controller image
-	Image string `json:"image,omitempty"`
-	// Version describes the version of Thanos receive controller to use.
-	Version string `json:"version,omitempty"`
+type ReceiveControllerSpec struct {
 	// Compute Resources required by this container.
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
@@ -110,12 +116,8 @@ type ThanosReceiveControllerSpec struct {
 }
 
 type ReceiversSpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
 	// Number of Receiver replicas.
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate
 	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
 	// ReplicationFactor defines the number of copies of every time-series
@@ -129,10 +131,6 @@ type ReceiversSpec struct {
 }
 
 type StoreSpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
 	// VolumeClaimTemplate
 	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
 	Shards              *int32              `json:"shards,omitempty"`
@@ -148,10 +146,6 @@ type StoreSpec struct {
 
 // StoreCacheSpec describes configuration for Store Memcached
 type StoreCacheSpec struct {
-	// Memcached image
-	Image string `json:"image,omitempty"`
-	// Version of Memcached image to be deployed.
-	Version string `json:"version,omitempty"`
 	// Memcached Prometheus Exporter image
 	ExporterImage string `json:"exporterImage,omitempty"`
 	// Version of Memcached Prometheus Exporter image to be deployed.
@@ -167,6 +161,85 @@ type StoreCacheSpec struct {
 	// +optional
 	ExporterResources v1.ResourceRequirements `json:"exporterResources,omitempty"`
 	// ServiceMonitor enables deploying a service monitor for the Thanos Store Caches.
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type QuerySpec struct {
+	// Number of Query replicas.
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Compute Resources required by this container.
+	// +optional
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	// ServiceMonitor enables deploying a service monitor for the Thanos Queriers.
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type RuleConfig struct {
+	// Rule ConfigMap Name
+	Name string `json:"name"`
+	// Rule ConfigMap key
+	Key string `json:"key"`
+}
+
+type RuleSpec struct {
+	// Number of Rule replicas.
+	Replicas *int32 `json:"replicas,omitempty"`
+	// VolumeClaimTemplate
+	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
+	// RulesConfig configures rules from the configmaps
+	// +optional
+	RulesConfig []RuleConfig `json:"rulesConfig,omitempty"`
+	// AlertmanagerURLs
+	// +optional
+	AlertmanagerURLs []string `json:"alertmanagerURLs,omitempty"`
+	// ReloaderImage is an image of configmap reloader
+	// +optional
+	ReloaderImage string `json:"reloaderImage,omitempty"`
+	// Compute Resources required by this container.
+	// +optional
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	// Compute Resources required by this container.
+	// +optional
+	ReloaderResources v1.ResourceRequirements `json:"reloaderResources,omitempty"`
+	// ServiceMonitor enables deploying a service monitor for the Thanos Rulers.
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type CompactSpec struct {
+	// Number of Compact replicas.
+	Replicas *int32 `json:"replicas,omitempty"`
+	// VolumeClaimTemplate
+	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
+	// RetentionResolutionRaw
+	RetentionResolutionRaw string `json:"retentionResolutionRaw"`
+	// RetentionResolutionRaw
+	RetentionResolution5m string `json:"retentionResolution5m"`
+	// RetentionResolutionRaw
+	RetentionResolution1h string `json:"retentionResolution1h"`
+	// EnableDownsampling enables downsampling.
+	EnableDownsampling bool `json:"enableDownsampling,omitempty"`
+	// Compute Resources required by this container.
+	// +optional
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	// ServiceMonitor enables deploying a service monitor for the Thanos Compactors.
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type VolumeClaimTemplate struct {
+	Spec v1.PersistentVolumeClaimSpec `json:"spec"`
+}
+
+type QueryFrontendSpec struct {
+	// Number of Query Frontend replicas.
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Compute Resources required by this container.
+	// +optional
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	// ServiceMonitor enables deploying a service monitor for the Thanos Query Frontends.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
@@ -290,101 +363,6 @@ type APISpec struct {
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
 	// ServiceMonitor enables deploying a service monitor for the Observatorium API.
-	// +optional
-	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-}
-
-type QuerySpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
-	// Number of Query replicas.
-	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
-	// Compute Resources required by this container.
-	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables deploying a service monitor for the Thanos Queriers.
-	// +optional
-	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-}
-
-type RuleConfig struct {
-	// Rule ConfigMap Name
-	Name string `json:"name"`
-	// Rule ConfigMap key
-	Key string `json:"key"`
-}
-
-type RuleSpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
-	// Number of Rule replicas.
-	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
-	// VolumeClaimTemplate
-	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
-	// RulesConfig configures rules from the configmaps
-	// +optional
-	RulesConfig []RuleConfig `json:"rulesConfig,omitempty"`
-	// AlertmanagerURLs
-	// +optional
-	AlertmanagerURLs []string `json:"alertmanagerURLs,omitempty"`
-	// ReloaderImage is an image of configmap reloader
-	// +optional
-	ReloaderImage string `json:"reloaderImage,omitempty"`
-	// Compute Resources required by this container.
-	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// Compute Resources required by this container.
-	// +optional
-	ReloaderResources v1.ResourceRequirements `json:"reloaderResources,omitempty"`
-	// ServiceMonitor enables deploying a service monitor for the Thanos Rulers.
-	// +optional
-	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-}
-
-type CompactSpec struct {
-	// Thanos image
-	Image string `json:"image,omitempty"`
-	// Number of Compact replicas.
-	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Thanos image to be deployed.
-	Version string `json:"version,omitempty"`
-	// VolumeClaimTemplate
-	VolumeClaimTemplate VolumeClaimTemplate `json:"volumeClaimTemplate"`
-	// RetentionResolutionRaw
-	RetentionResolutionRaw string `json:"retentionResolutionRaw"`
-	// RetentionResolutionRaw
-	RetentionResolution5m string `json:"retentionResolution5m"`
-	// RetentionResolutionRaw
-	RetentionResolution1h string `json:"retentionResolution1h"`
-	// EnableDownsampling enables downsampling.
-	EnableDownsampling bool `json:"enableDownsampling,omitempty"`
-	// Compute Resources required by this container.
-	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables deploying a service monitor for the Thanos Compactors.
-	// +optional
-	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
-}
-
-type VolumeClaimTemplate struct {
-	Spec v1.PersistentVolumeClaimSpec `json:"spec"`
-}
-
-type QueryFrontendSpec struct {
-	// Thanos Query Frontend image
-	Image string `json:"image,omitempty"`
-	// Number of Query Frontend replicas.
-	Replicas *int32 `json:"replicas,omitempty"`
-	// Version of Query Frontend image to be deployed.
-	Version string `json:"version,omitempty"`
-	// Compute Resources required by this container.
-	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	// ServiceMonitor enables deploying a service monitor for the Thanos Query Frontends.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }

@@ -46,21 +46,6 @@ spec:
       keyKey: key.pem
       secretName: observatorium-xyz-tls
     version: main-2021-11-30-v0.1.2-106-g2adff5f
-  compact:
-    enableDownsampling: false
-    image: quay.io/thanos/thanos:v0.24.0
-    replicas: 1
-    retentionResolution1h: 1s
-    retentionResolution5m: 1s
-    retentionResolutionRaw: 14d
-    version: v0.24.0
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 50Gi
   hashrings:
   - hashring: default
     tenants: []
@@ -91,57 +76,60 @@ spec:
     thanos:
       key: thanos.yaml
       name: thanos-objectstorage
-  query:
-    image: quay.io/thanos/thanos:v0.24.0
-    replicas: 1
-    version: v0.24.0
-  queryFrontend:
-    image: quay.io/thanos/thanos:v0.24.0
-    replicas: 1
-    version: v0.24.0
-  receivers:
-    image: quay.io/thanos/thanos:v0.24.0
-    replicas: 1
-    version: v0.24.0
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 50Gi
-  rule:
-    image: quay.io/thanos/thanos:v0.24.0
-    replicas: 1
-    version: v0.24.0
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 50Gi
   securityContext:
     fsGroup: 65534
     runAsUser: 65534
-  store:
-    cache:
-      exporterImage: prom/memcached-exporter:v0.6.0
-      exporterVersion: v0.6.0
-      image: docker.io/memcached:1.6.3-alpine
-      memoryLimitMb: 1024
+  thanos:
+    compact:
+      enableDownsampling: false
       replicas: 1
-      version: 1.6.3-alpine
+      retentionResolution1h: 1s
+      retentionResolution5m: 1s
+      retentionResolutionRaw: 14d
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
     image: quay.io/thanos/thanos:v0.24.0
-    shards: 1
+    query:
+      replicas: 1
+    queryFrontend:
+      replicas: 1
+    receivers:
+      replicas: 1
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+    rule:
+      replicas: 1
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+    store:
+      cache:
+        exporterImage: prom/memcached-exporter:v0.6.0
+        exporterVersion: v0.6.0
+        image: docker.io/memcached:1.6.3-alpine
+        memoryLimitMb: 1024
+        replicas: 1
+        version: 1.6.3-alpine
+      shards: 1
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
     version: v0.24.0
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 50Gi
-  thanosReceiveController:
-    image: quay.io/observatorium/thanos-receive-controller:master-2021-04-28-ee165b6
-    version: master-2021-04-28-ee165b6
