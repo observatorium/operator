@@ -135,10 +135,71 @@ local operatorObs = obs {
         },
       } else {}
     ) + (
+      if (v.kind == 'StatefulSet' || v.kind == 'Deployment') then {
+        template+: {
+          spec+:{
+            affinity: {
+              podAntiAffinity: {
+                preferredDuringSchedulingIgnoredDuringExecution: [
+                  {
+                    podAffinityTerm: {
+                      labelSelector: {
+                        matchExpressions:[
+                          {
+                            key: 'app.kubernetes.io/name',
+                            operator: 'In',
+                            values: [
+                              v.metadata.labels['app.kubernetes.io/name'],
+                            ],
+                          },
+                          {
+                            key: 'app.kubernetes.io/instance',
+                            operator: 'In',
+                            values: [
+                              v.metadata.labels['app.kubernetes.io/instance'],
+                            ],
+                          },
+                        ],
+                      },
+                      topologyKey: "kubernetes.io/hostname",
+                    },
+                    weight: 30,
+                  },
+                  {
+                    podAffinityTerm: {
+                      labelSelector: {
+                        matchExpressions:[
+                          {
+                            key: 'app.kubernetes.io/name',
+                            operator: 'In',
+                            values: [
+                              v.metadata.labels['app.kubernetes.io/name'],
+                            ],
+                          },
+                          {
+                            key: 'app.kubernetes.io/instance',
+                            operator: 'In',
+                            values: [
+                              v.metadata.labels['app.kubernetes.io/instance'],
+                            ],
+                          },
+                        ],
+                      },
+                      topologyKey: "topology.kubernetes.io/zone",
+                    },
+                    weight: 70,
+                  },
+                ],
+              },
+            },
+          },
+        },
+      } else {}
+    ) + (
       if (std.objectHas(obs.config, 'affinity') && (v.kind == 'StatefulSet' || v.kind == 'Deployment')) then {
         template+: {
-          spec+: {
-            affinity: obs.config.affinity,
+          spec+:{
+            affinity+: obs.config.affinity,
           },
         },
       } else {}
