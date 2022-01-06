@@ -144,6 +144,9 @@ type StoreSpec struct {
 	// ServiceMonitor enables deploying a service monitor for the Thanos Stores.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+	// Duration after which the blocks marked for deletion will be filtered out while fetching blocks.
+	// +optional
+	IgnoreDeletionMarksDelay string `json:"ignoreDeletionMarksDelay,omitempty"`
 }
 
 // StoreCacheSpec describes configuration for Store Memcached
@@ -368,6 +371,9 @@ type CompactSpec struct {
 	// ServiceMonitor enables deploying a service monitor for the Thanos Compactors.
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+	// Time before a block marked for deletion is deleted from object storage.
+	// +optional
+	DeleteDelay string `json:"deleteDelay,omitempty"`
 }
 
 type VolumeClaimTemplate struct {

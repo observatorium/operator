@@ -1069,6 +1069,10 @@ spec:
               compact:
                 description: Thanos CompactSpec
                 properties:
+                  deleteDelay:
+                    description: Time before a block marked for deletion is deleted
+                      from object storage.
+                    type: string
                   enableDownsampling:
                     description: EnableDownsampling enables downsampling.
                     type: boolean
@@ -2394,6 +2398,10 @@ spec:
                         description: Version of Memcached image to be deployed.
                         type: string
                     type: object
+                  ignoreDeletionMarksDelay:
+                    description: Duration after which the blocks marked for deletion
+                      will be filtered out while fetching blocks.
+                    type: string
                   image:
                     description: Thanos image
                     type: string
