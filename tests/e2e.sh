@@ -85,7 +85,10 @@ deploy_operator() {
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/observatorium/configuration/tests/manifests/observatorium-xyz-tls-configmap.yaml
     $KUBECTL apply -n observatorium -f jsonnet/vendor/github.com/observatorium/observatorium/configuration/tests/manifests/observatorium-xyz-tls-secret.yaml
     $KUBECTL apply -f manifests/crds
-    $KUBECTL apply -f manifests/
+    $KUBECTL apply -f manifests/cluster_role.yaml
+    $KUBECTL apply -f manifests/cluster_role_binding.yaml
+    $KUBECTL apply -f manifests/service_account.yaml
+    $KUBECTL apply -f manifests/operator.yaml
     $KUBECTL apply -n observatorium -f example/manifests
     wait_for_cr observatorium-xyz
 }
